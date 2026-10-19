@@ -416,3 +416,25 @@ section[id] { scroll-margin-top: 76px; }
   .s-nicho-foto { aspect-ratio: 1 / 1; }
   .s-nicho-foto img { top: 14%; height: 80%; }
 }
+
+/* ── marcas compactas: os perfumes aparecem logo ── */
+.marcas { padding-block: 32px 0; }
+.marcas .sec-topo { margin-bottom: 14px; }
+.grade-marcas { grid-auto-rows: auto; gap: 8px; }
+.tile-marca { min-height: 0; aspect-ratio: auto; padding: 12px 10px; gap: 2px; }
+.tile-marca span { font-size: 15px; letter-spacing: .1em; line-height: 1.2; }
+.tile-marca small { font-size: 10px; }
+.tile-marca img { max-height: 32px; }
+@media (max-width: 759px) {
+  .grade-marcas { grid-template-columns: none; grid-auto-flow: column; grid-template-rows: repeat(2, auto); grid-auto-columns: 40%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin-inline: calc(-1 * var(--gutter)); padding-inline: var(--gutter); scroll-padding-inline: var(--gutter); }
+  .grade-marcas::-webkit-scrollbar { display: none; }
+  .tile-marca { scroll-snap-align: start; }
+}
+@media (min-width: 760px) { .grade-marcas { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+.sec-marca { padding-block: 40px 0; }
+
+/* banner dos nichos com até 6 perfumes: 3 por linha no celular, todos lado a lado no computador */
+.s-nicho-grade { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px 12px; }
+.s-nicho-item { flex: 0 0 calc((100% - 24px) / 3); }
+@media (min-width: 600px) { .s-nicho-grade { flex-wrap: nowrap; gap: 16px; } .s-nicho-item { flex: 1 1 0; } }
+@media (max-width: 599px) { .s-nicho-nome { font-size: 16px; } .s-nicho-item .eyebrow { font-size: 8.5px; letter-spacing: .12em; } }
