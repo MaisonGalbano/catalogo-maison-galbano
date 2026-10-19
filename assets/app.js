@@ -112,6 +112,24 @@
       '</div></div>';
   }
 
+  // banner dos nichos mais vendidos: os códigos (MG...) ficam em config.json → banner_nicho.ids
+  function slideNicho() {
+    var b = CFG.banner_nicho || {};
+    var ps = (b.ids || []).map(function (id) { return porId(String(id).trim().toUpperCase()); }).filter(function (p) { return p && p.img; });
+    if (!ps.length) return '';
+    var t = esc(b.titulo || 'Os ícones da perfumaria de nicho.').replace(/(de nicho\.?)$/, '<em>$1</em>');
+    return '<div class="slide s-nicho"><div class="wrap s-nicho-in">' +
+      '<div class="s-nicho-txt"><p class="eyebrow">' + esc(b.chamada || 'Nicho · Os mais desejados') + '</p>' +
+        '<h2 class="h-display">' + t + '</h2>' +
+        (b.texto ? '<p class="s-nicho-sub">' + esc(b.texto) + '</p>' : '') +
+        '<a class="link-fino" href="#acervo" data-cat-link="Nicho">Ver todos os nichos</a></div>' +
+      '<div class="s-nicho-grade">' + ps.slice(0, 4).map(function (p) {
+        return '<a class="s-nicho-item" href="p/' + p.slug + '/"><div class="s-nicho-foto"><img src="' + p.img + '" alt="' + esc(nomeTodo(p)) + '" decoding="async"></div>' +
+          '<span class="eyebrow">' + esc(p.marca) + '</span><span class="s-nicho-nome">' + esc(p.nome) + '</span></a>';
+      }).join('') + '</div>' +
+      '</div></div>';
+  }
+
   function slideMarca(m) {
     if (m.banner) {   // banner oficial da fabricante (pasta fotos/marcas)
       return '<a class="slide s-oficial" href="#marca-' + m.slug + '"><picture>' +
@@ -129,6 +147,7 @@
 
   function vitrine(dest, ms) {
     var slides = [slideInstitucional(dest)];
+    var nicho = slideNicho(); if (nicho) slides.unshift(nicho);  // banner dos nichos abre a vitrine
     ms.forEach(function (m) { if (m.banner) slides.push(slideMarca(m)); });
     if (dest) ms.forEach(function (m) { if (m.marca === dest.marca && !m.banner && (dest.img_ed || dest.img)) slides.push(slideMarca(m)); });
     slides = slides.slice(0, 7);
