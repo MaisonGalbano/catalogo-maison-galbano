@@ -1,0 +1,7 @@
+Banners oficiais das marcas (opcional)
+
+afnan.jpg          -> banner para computador (1920 x 800)
+afnan-celular.jpg  -> banner para celular (1080 x 1350)
+afnan-logo.png     -> logo da marca, fundo transparente
+
+O nome do arquivo e o nome da marca como esta na planilha.

@@ -1,0 +1,46 @@
+{
+  "site_url": "https://maisongalbano.github.io/catalogo-maison-galbano/",
+  "csv_url": "",
+  "whatsapp": "5511910000124",
+  "meta_pixel_id": "",
+  "cartao_acrescimo": 10,
+  "parcelas": 6,
+  "decant_faixas": [
+    [
+      200,
+      38
+    ],
+    [
+      250,
+      40
+    ],
+    [
+      300,
+      42
+    ],
+    [
+      350,
+      45
+    ],
+    [
+      400,
+      47
+    ],
+    [
+      450,
+      55
+    ],
+    [
+      500,
+      60
+    ],
+    [
+      600,
+      70
+    ],
+    [
+      800,
+      75
+    ]
+  ]
+}
