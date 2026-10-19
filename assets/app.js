@@ -123,7 +123,7 @@
         '<h2 class="h-display">' + t + '</h2>' +
         (b.texto ? '<p class="s-nicho-sub">' + esc(b.texto) + '</p>' : '') +
         '<a class="link-fino" href="#acervo" data-cat-link="Nicho">Ver todos os nichos</a></div>' +
-      '<div class="s-nicho-grade">' + ps.slice(0, 4).map(function (p) {
+      '<div class="s-nicho-grade">' + ps.slice(0, 6).map(function (p) {
         return '<a class="s-nicho-item" href="p/' + p.slug + '/"><div class="s-nicho-foto"><img src="' + p.img + '" alt="' + esc(nomeTodo(p)) + '" decoding="async"></div>' +
           '<span class="eyebrow">' + esc(p.marca) + '</span><span class="s-nicho-nome">' + esc(p.nome) + '</span></a>';
       }).join('') + '</div>' +
