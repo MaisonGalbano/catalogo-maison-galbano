@@ -1,6 +1,6 @@
 # Catálogo Maison Galbano Parfums
 
-Site: https://premierbrandsstore-bit.github.io/catalogo-maison-galbano/
+Site: https://maisongalbano.github.io/catalogo-maison-galbano/
 
 ## No dia a dia
 - **Produtos, preços, disponível, destaque:** na planilha do Google (aba Produtos).
