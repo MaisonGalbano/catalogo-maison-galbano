@@ -5,6 +5,17 @@
   "meta_pixel_id": "",
   "cartao_acrescimo": 10,
   "parcelas": 6,
+  "banner_nicho": {
+    "chamada": "Nicho · Os mais desejados",
+    "titulo": "Os ícones da perfumaria de nicho.",
+    "texto": "Os favoritos de quem coleciona: Sospiro, Parfums de Marly, Amouage e Xerjoff.",
+    "ids": [
+      "MG085",
+      "MG122",
+      "MG084",
+      "MG101"
+    ]
+  },
   "decant_faixas": [
     [
       200,
