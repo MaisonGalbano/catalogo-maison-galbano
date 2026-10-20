@@ -14,6 +14,7 @@
     { rot: 'Compartilháveis', f: function (p) { return p.perfil === 'Compartilhável'; } },
     { rot: 'Seleção Maison Galbano', f: function (p) { return p.destaque; } }
   ];
+  var marcaSel = '';  // marca escolhida nos quadrinhos de Marcas (filtra o acervo)
   var st = { cat: null, desc: null, perfil: '', familia: '', ocasiao: '', busca: '' };
 
   // ── utilidades ──
@@ -122,7 +123,7 @@
       '<div class="s-nicho-txt"><p class="eyebrow">' + esc(b.chamada || 'Nicho · Os mais desejados') + '</p>' +
         '<h2 class="h-display">' + t + '</h2>' +
         (b.texto ? '<p class="s-nicho-sub">' + esc(b.texto) + '</p>' : '') +
-        '<a class="link-fino" href="#acervo" data-cat-link="Nicho">Ver todos os nichos</a></div>' +
+        '<a class="link-fino" href="#resultado" data-cat-link="Nicho">Ver todos os nichos</a></div>' +
       '<div class="s-nicho-grade">' + ps.slice(0, 6).map(function (p) {
         return '<a class="s-nicho-item" href="p/' + p.slug + '/"><div class="s-nicho-foto"><img src="' + p.img + '" alt="' + esc(nomeTodo(p)) + '" decoding="async"></div>' +
           '<span class="eyebrow">' + esc(p.marca) + '</span><span class="s-nicho-nome">' + esc(p.nome) + '</span></a>';
@@ -132,7 +133,7 @@
 
   function slideMarca(m) {
     if (m.banner) {   // banner oficial da fabricante (pasta fotos/marcas)
-      return '<a class="slide s-oficial" href="#marca-' + m.slug + '"><picture>' +
+      return '<a class="slide s-oficial" href="#resultado" data-marca="' + esc(m.marca) + '"><picture>' +
         (m.banner_celular ? '<source media="(max-width: 759px)" srcset="' + m.banner_celular + '">' : '') +
         '<img src="' + m.banner + '" alt="' + esc(m.marca) + '"></picture></a>';
     }
@@ -141,7 +142,7 @@
     return '<div class="slide s-marca"><div class="wrap s-marca-grid">' +
       '<a class="s-marca-img" href="' + link + '"><img src="' + (p.img_ed || p.img) + '" alt="' + esc(nomeTodo(p)) + '"></a>' +
       '<div class="s-marca-txt"><p class="eyebrow">A casa</p><h2 class="h-display">' + esc(m.marca) + '</h2>' +
-      '<p class="s-marca-prod">' + esc(p.nome) + '</p><a class="link-fino" href="#marca-' + m.slug + '">Ver ' + esc(m.marca) + '</a></div>' +
+      '<p class="s-marca-prod">' + esc(p.nome) + '</p><a class="link-fino" href="#resultado" data-marca="' + esc(m.marca) + '">Ver ' + esc(m.marca) + '</a></div>' +
       '</div></div>';
   }
 
@@ -153,7 +154,7 @@
     slides = slides.slice(0, 7);
     return '<header class="topo"><div class="wrap topo-in">' +
         '<a href="./" class="topo-logo"><img src="assets/logo-maison-galbano.png" alt="Maison Galbano" width="52" height="52"></a>' +
-        '<nav class="topo-nav"><a href="#marcas">Marcas</a><a href="#acervo">Acervo</a><a href="#decants">Decants</a></nav>' +
+        '<nav class="topo-nav"><a href="#marcas">Marcas</a><a href="#acervo">Acervo</a><a href="#resultado" data-cat-link="Decants">Decants</a></nav>' +
       '</div></header>' +
       '<section class="vitrine" aria-label="Destaques" aria-roledescription="carrossel">' +
         '<div class="trilho" id="trilho">' + slides.join('') + '</div>' +
@@ -167,14 +168,14 @@
     return '<section id="marcas" class="marcas"><div class="wrap">' +
       '<div class="sec-topo"><h2 class="h-display">Marcas</h2><span class="contagem">' + ms.length + (ms.length === 1 ? ' casa' : ' casas') + '</span></div>' +
       '<div class="grade-marcas">' + ms.slice().sort(function (a, b) { return a.marca.localeCompare(b.marca, 'pt-BR'); }).map(function (m) {
-        return '<a href="#marca-' + m.slug + '" class="tile-marca">' +
+        return '<a href="#resultado" data-marca="' + esc(m.marca) + '" class="tile-marca">' +
           (m.logo ? '<img src="' + m.logo + '" alt="' + esc(m.marca) + '">' : '<span>' + esc(m.marca) + '</span>') +
           '<small>' + m.produtos.length + (m.produtos.length === 1 ? ' fragrância' : ' fragrâncias') + '</small></a>';
       }).join('') + '</div></div></section>' +
       ms.slice(0, 4).map(function (m) {
         return '<section class="sec-marca" id="marca-' + m.slug + '"><div class="wrap">' +
           '<div class="sec-topo"><div><p class="eyebrow">A casa</p><h2 class="h-display">' + esc(m.marca) + '</h2></div>' +
-          '<a class="link-fino" href="#acervo" data-busca="' + esc(m.marca) + '">Ver todos</a></div></div>' +
+          '<a class="link-fino" href="#resultado" data-busca="' + esc(m.marca) + '">Ver todos</a></div></div>' +
           '<div class="fileira">' + m.produtos.map(card).join('') + '</div></section>';
       }).join('');
   }
@@ -224,7 +225,7 @@
         '<label class="sr" for="busca">Buscar</label><input id="busca" class="busca" type="search" placeholder="Buscar por nome ou marca" autocomplete="off">' +
         '<button type="button" class="limpar" id="limpar" hidden>Limpar filtros</button>' +
       '</div>' +
-      '<div class="acervo-topo"><h2 class="h-display" id="tituloGrade" style="font-size:30px"></h2><span class="contagem" id="contagem"></span></div>' +
+      '<div class="acervo-topo" id="resultado" style="scroll-margin-top:84px"><h2 class="h-display" id="tituloGrade" style="font-size:30px"></h2><span class="contagem" id="contagem"></span></div>' +
       '<div class="grade" id="grade"></div>' +
     '</div></section>' +
 
@@ -241,7 +242,7 @@
       '<p class="ml">5<small>ml</small></p>' +
       '<div style="display:grid;gap:18px" class="measure"><p class="eyebrow">Decants</p><h2 class="h-display">Descubra antes de escolher.</h2>' +
       '<p>Grandes fragrâncias merecem ser descobertas sem pressa. Nossos decants permitem explorar diferentes universos olfativos antes de investir no frasco completo.</p>' +
-      '<a class="link-fino" href="#acervo" data-cat-link="Decants">Ver decants</a></div>' +
+      '<a class="link-fino" href="#resultado" data-cat-link="Decants">Ver decants</a></div>' +
       '<div id="kits" hidden><!-- Reservado: discovery sets e kits de 3 e 5 decants --></div>' +
     '</div></section>' + rodape();
   }
@@ -300,6 +301,7 @@
     var b = st.busca;
     var res = PRODUTOS.filter(function (p) {
       return (!p.pai || st.cat === 'Decants' || b) &&
+        (!marcaSel || p.marca === marcaSel) &&
         (!st.cat || p.categoria === (CAT_KEY[st.cat] || st.cat)) &&
         (st.desc === null || DESCOBERTA[st.desc].f(p)) &&
         (!st.perfil || p.perfil === st.perfil) &&
@@ -307,13 +309,13 @@
         (!st.ocasiao || lista(p.ocasiao).map(cap).indexOf(st.ocasiao) > -1) &&
         (!b || nomeTodo(p).toLowerCase().indexOf(b) > -1);
     });
-    var titulo = st.desc !== null ? DESCOBERTA[st.desc].rot : (st.cat || 'Todas as fragrâncias');
+    var titulo = marcaSel || (st.desc !== null ? DESCOBERTA[st.desc].rot : (st.cat || 'Todas as fragrâncias'));
     $('#tituloGrade').textContent = titulo;
     $('#contagem').textContent = res.length + (res.length === 1 ? ' fragrância' : ' fragrâncias');
     g.innerHTML = res.length ? res.map(card).join('') : '<p class="vazio">Nenhuma fragrância com essa combinação. Novas chegam em breve.</p>';
     [].forEach.call(document.querySelectorAll('[data-cat]'), function (el) { el.setAttribute('aria-pressed', el.getAttribute('data-cat') === st.cat); });
     [].forEach.call(document.querySelectorAll('[data-desc]'), function (el) { el.setAttribute('aria-pressed', Number(el.getAttribute('data-desc')) === st.desc); });
-    $('#limpar').hidden = !(st.cat || st.desc !== null || st.perfil || st.familia || st.ocasiao || st.busca);
+    $('#limpar').hidden = !(marcaSel || st.cat || st.desc !== null || st.perfil || st.familia || st.ocasiao || st.busca);
   }
 
   // ── render ──
@@ -327,6 +329,11 @@
   document.addEventListener('click', function (e) {
     var t = e.target.closest ? e.target : e.target.parentNode;
     var el;
+    if (t.closest('[data-cat],[data-cat-link],[data-busca],[data-desc]') || t.id === 'limpar') marcaSel = '';
+    if ((el = t.closest('[data-marca]'))) {
+      st = { cat: null, desc: null, perfil: '', familia: '', ocasiao: '', busca: '' }; marcaSel = el.getAttribute('data-marca');
+      var bm = $('#busca'); if (bm) bm.value = ''; [].forEach.call(document.querySelectorAll('[data-filtro]'), function (s) { s.value = ''; }); aplicar(); return;
+    }
     if ((el = t.closest('[data-cat]'))) { var c = el.getAttribute('data-cat'); st.cat = st.cat === c ? null : c; st.desc = null; aplicar(); return; }
     if ((el = t.closest('[data-cat-link]'))) { st.cat = el.getAttribute('data-cat-link'); st.desc = null; aplicar(); }
     if ((el = t.closest('[data-busca]'))) { st = { cat: null, desc: null, perfil: '', familia: '', ocasiao: '', busca: el.getAttribute('data-busca').toLowerCase() }; var bi = $('#busca'); if (bi) bi.value = el.getAttribute('data-busca'); aplicar(); }
@@ -344,7 +351,7 @@
       else toast('Copie o link na barra do navegador');
     }
   });
-  document.addEventListener('input', function (e) { if (e.target.id === 'busca') { st.busca = e.target.value.trim().toLowerCase(); aplicar(); } });
+  document.addEventListener('input', function (e) { if (e.target.id === 'busca') { marcaSel = ''; st.busca = e.target.value.trim().toLowerCase(); aplicar(); } });
   document.addEventListener('change', function (e) { var f = e.target.getAttribute && e.target.getAttribute('data-filtro'); if (f) { st[f] = e.target.value; aplicar(); } });
 
   // ── preço e disponibilidade ao vivo da planilha (o resto atualiza a cada publicação) ──
