@@ -329,6 +329,13 @@
   document.addEventListener('click', function (e) {
     var t = e.target.closest ? e.target : e.target.parentNode;
     var el;
+    // links internos (#acervo, #resultado...): rola até lá sem recarregar a página
+    // (links do Instagram/anúncios chegam com ?fbclid=... e o navegador recarregaria)
+    var ancora = t.closest('a[href^="#"]');
+    if (ancora) {
+      var alvo = document.getElementById(ancora.getAttribute('href').slice(1));
+      if (alvo) { e.preventDefault(); setTimeout(function () { alvo.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 0); }
+    }
     if (t.closest('[data-cat],[data-cat-link],[data-busca],[data-desc]') || t.id === 'limpar') marcaSel = '';
     if ((el = t.closest('[data-marca]'))) {
       st = { cat: null, desc: null, perfil: '', familia: '', ocasiao: '', busca: '' }; marcaSel = el.getAttribute('data-marca');
