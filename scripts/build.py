@@ -329,7 +329,7 @@ def main():
         destino.write_text(html, encoding='utf-8')
 
     gerar('', './', 'home', 'Maison Galbano Parfums — Catálogo',
-          'Uma curadoria de fragrâncias extraordinárias: nicho, árabes, designer e decants de 5 ml. Perfumes 100% originais, com envio para todo o Brasil.',
+          'Uma curadoria de fragrâncias extraordinárias: árabes, importados, nicho e decants de 5 ml. Perfumes 100% originais, com envio para todo o Brasil.',
           'assets/og-capa.jpg')
     for p in produtos:
         titulo = f"{p['marca']} {p['nome']} · Maison Galbano"

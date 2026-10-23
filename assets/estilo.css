@@ -438,3 +438,20 @@ section[id] { scroll-margin-top: 76px; }
 .s-nicho-item { flex: 0 0 calc((100% - 24px) / 3); }
 @media (min-width: 600px) { .s-nicho-grade { flex-wrap: nowrap; gap: 16px; } .s-nicho-item { flex: 1 1 0; } }
 @media (max-width: 599px) { .s-nicho-nome { font-size: 16px; } .s-nicho-item .eyebrow { font-size: 8.5px; letter-spacing: .12em; } }
+
+/* ── coleções na entrada: Árabes · Importados · Nicho ── */
+.colecoes { padding-block: clamp(48px, 10vw, 88px) 0; }
+.grade-col { display: grid; grid-template-columns: 1fr; gap: 14px; }
+@media (min-width: 760px) { .grade-col { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; } }
+.tile-col { display: grid; grid-template-columns: 38% 1fr; align-items: center; background: var(--off); border: 1px solid var(--linha); text-decoration: none; overflow: hidden; min-width: 0; }
+.tile-col .foto { aspect-ratio: 4 / 5; display: grid; place-items: center; padding: 10% 6% 10% 12%; overflow: hidden; }
+@media (min-width: 760px) { .tile-col { grid-template-columns: 1fr; } .tile-col .foto { padding: 12% 12% 0; } }
+.tile-col img { max-width: 100%; max-height: 100%; object-fit: contain; mix-blend-mode: multiply; transition: transform .6s ease; }
+.tile-col:hover img { transform: scale(1.04); }
+.tile-col .txt { display: grid; gap: 6px; text-align: left; padding: 16px 18px 16px 10px; }
+@media (min-width: 760px) { .tile-col .txt { text-align: center; padding: 18px 16px 24px; } }
+.tile-col .nome-col { font-family: var(--display); font-size: clamp(32px, 8vw, 42px); line-height: 1; color: var(--verde); }
+.tile-col .frase { font-family: var(--display); font-style: italic; font-size: 16px; color: var(--grafite); }
+.tile-col small { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--grafite-suave); }
+.tile-col:hover .nome-col { color: var(--ouro); }
+.sec-col { padding-block: clamp(48px, 10vw, 88px) 0; }

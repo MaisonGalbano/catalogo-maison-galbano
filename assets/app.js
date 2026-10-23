@@ -6,8 +6,15 @@
   var PRODUTOS = window.PRODUTOS || [];
   var ROTA = window.ROTA || 'home';
 
-  var CATEGORIAS = ['Nicho', 'Árabe', 'Designer', 'Decants'];
-  var CAT_KEY = { 'Decants': 'Decant' };
+  var CATEGORIAS = ['Árabes', 'Importados', 'Nicho', 'Decants'];
+  var CAT_KEY = { 'Árabes': 'Árabe', 'Importados': 'Designer', 'Decants': 'Decant' };   // nome no site → valor da coluna categoria
+  var CAT_ROT = { 'Árabe': 'Árabes', 'Designer': 'Importados', 'Decant': 'Decants' };    // valor da planilha → nome no site
+  var COLECOES = [
+    { nome: 'Árabes', frase: 'A intensidade e o luxo do Oriente' },
+    { nome: 'Importados', frase: 'Os clássicos das grandes grifes' },
+    { nome: 'Nicho', frase: 'Perfumaria artística e rara' }
+  ];
+  var CAPA_COL = { 'Importados': 'MG129', 'Nicho': 'MG092' };   // foto de capa de cada coleção (se faltar, usa o destaque ou o primeiro)
   var DESCOBERTA = [
     { rot: 'Masculinos', f: function (p) { return p.perfil === 'Masculino'; } },
     { rot: 'Femininos', f: function (p) { return p.perfil === 'Feminino'; } },
@@ -154,7 +161,7 @@
     slides = slides.slice(0, 7);
     return '<header class="topo"><div class="wrap topo-in">' +
         '<a href="./" class="topo-logo"><img src="assets/logo-maison-galbano.png" alt="Maison Galbano" width="52" height="52"></a>' +
-        '<nav class="topo-nav"><a href="#marcas">Marcas</a><a href="#acervo">Acervo</a><a href="#resultado" data-cat-link="Decants">Decants</a></nav>' +
+        '<nav class="topo-nav"><a href="#colecoes">Coleções</a><a href="#acervo">Acervo</a><a href="#resultado" data-cat-link="Decants">Decants</a></nav>' +
       '</div></header>' +
       '<section class="vitrine" aria-label="Destaques" aria-roledescription="carrossel">' +
         '<div class="trilho" id="trilho">' + slides.join('') + '</div>' +
@@ -163,20 +170,28 @@
       '<div class="faixa"><div class="wrap faixa-in"><span>100% originais</span><span>Envio para todo o Brasil</span><span>Decants de 5 ml</span><span>Atendimento pelo WhatsApp</span></div></div>';
   }
 
-  function secaoMarcas(ms) {
-    if (!ms.length) return '';
-    return '<section id="marcas" class="marcas"><div class="wrap">' +
-      '<div class="sec-topo"><h2 class="h-display">Marcas</h2><span class="contagem">' + ms.length + (ms.length === 1 ? ' casa' : ' casas') + '</span></div>' +
-      '<div class="grade-marcas">' + ms.slice().sort(function (a, b) { return a.marca.localeCompare(b.marca, 'pt-BR'); }).map(function (m) {
-        return '<a href="#resultado" data-marca="' + esc(m.marca) + '" class="tile-marca">' +
-          (m.logo ? '<img src="' + m.logo + '" alt="' + esc(m.marca) + '">' : '<span>' + esc(m.marca) + '</span>') +
-          '<small>' + m.produtos.length + (m.produtos.length === 1 ? ' fragrância' : ' fragrâncias') + '</small></a>';
+  // coleções na entrada: Árabes · Importados · Nicho (no lugar da lista de marcas)
+  function daColecao(c) {
+    var lista = PRODUTOS.filter(function (p) { return p.categoria === (CAT_KEY[c] || c) && !p.pai; });
+    return lista.filter(function (p) { return p.destaque; }).reverse().concat(lista.filter(function (p) { return !p.destaque; }));
+  }
+  function secaoColecoes() {
+    var cs = COLECOES.map(function (c) { return { nome: c.nome, frase: c.frase, produtos: daColecao(c.nome) }; }).filter(function (c) { return c.produtos.length; });
+    if (!cs.length) return '';
+    return '<section id="colecoes" class="colecoes"><div class="wrap">' +
+      '<div class="sec-topo"><div><p class="eyebrow">Maison Galbano</p><h2 class="h-display">Coleções</h2></div></div>' +
+      '<div class="grade-col">' + cs.map(function (c) {
+        var capa = c.produtos.filter(function (p) { return p.img && p.id === CAPA_COL[c.nome]; })[0] || c.produtos.filter(function (p) { return p.img; })[0];
+        return '<a href="#resultado" class="tile-col" data-cat-link="' + c.nome + '">' +
+          '<div class="foto">' + (capa ? '<img src="' + capa.img + '" alt="" loading="lazy">' : '') + '</div>' +
+          '<div class="txt"><span class="nome-col">' + c.nome + '</span><span class="frase">' + c.frase + '</span>' +
+          '<small>' + c.produtos.length + (c.produtos.length === 1 ? ' fragrância' : ' fragrâncias') + '</small></div></a>';
       }).join('') + '</div></div></section>' +
-      ms.slice(0, 4).map(function (m) {
-        return '<section class="sec-marca" id="marca-' + m.slug + '"><div class="wrap">' +
-          '<div class="sec-topo"><div><p class="eyebrow">A casa</p><h2 class="h-display">' + esc(m.marca) + '</h2></div>' +
-          '<a class="link-fino" href="#resultado" data-busca="' + esc(m.marca) + '">Ver todos</a></div></div>' +
-          '<div class="fileira">' + m.produtos.map(card).join('') + '</div></section>';
+      cs.map(function (c) {
+        return '<section class="sec-col"><div class="wrap">' +
+          '<div class="sec-topo"><div><p class="eyebrow">Coleção</p><h2 class="h-display">' + c.nome + '</h2></div>' +
+          '<a class="link-fino" href="#resultado" data-cat-link="' + c.nome + '">Ver todos</a></div></div>' +
+          '<div class="fileira">' + c.produtos.slice(0, 12).map(card).join('') + '</div></section>';
       }).join('');
   }
 
@@ -206,10 +221,10 @@
     var familias = uniq(PRODUTOS.map(function (p) { return p.familia_olfativa; }));
     var ocasioes = uniq([].concat.apply([], PRODUTOS.map(function (p) { return lista(p.ocasiao).map(cap); })));
     var ms = marcas();
-    return vitrine(dest, ms) + secaoMarcas(ms) +
+    return vitrine(dest, ms) + secaoColecoes() +
     '<section class="apres-sec"><div class="wrap"><div class="apres measure">' +
       '<p class="eyebrow">A Maison</p>' +
-      '<p class="lede">Perfumaria de nicho, árabe e designer, com decants para conhecer cada fragrância antes do frasco. Uma seleção feita em São Paulo, com envio para todo o Brasil.</p>' +
+      '<p class="lede">Perfumaria árabe, importada e de nicho, com decants para conhecer cada fragrância antes do frasco. Uma seleção feita em São Paulo, com envio para todo o Brasil.</p>' +
       '<figure class="filosofia"><blockquote>“Na Maison Galbano, perfume original não é uma escolha. É uma obrigação e uma forma de respeito aos nossos clientes.”</blockquote><figcaption>Edson e Isabel, fundadores</figcaption></figure>' +
     '</div></div></section>' +
 
@@ -264,7 +279,7 @@
 
   function pagina(p) {
     var nv = niveis(p);
-    var dados = [['Família olfativa', p.familia_olfativa], ['Perfil', p.perfil], ['Ocasião', p.ocasiao], ['Categoria', p.categoria]].filter(function (d) { return d[1]; });
+    var dados = [['Família olfativa', p.familia_olfativa], ['Perfil', p.perfil], ['Ocasião', p.ocasiao], ['Coleção', CAT_ROT[p.categoria] || p.categoria]].filter(function (d) { return d[1]; });
     return barra() + '<div class="pdp-grid">' +
       '<div class="pdp-foto">' + (p.img ? '<img src="' + p.img + '" alt="' + esc(nomeTodo(p)) + '">' : '') + '</div>' +
       '<article class="pdp wrap">' +
