@@ -93,5 +93,32 @@
       "MG125"
     ],
     "Designer": []
+  },
+  "banner_arabes": {
+    "chamada": "Árabes · Os favoritos",
+    "titulo": "A intensidade e o luxo do",
+    "destaque": "Oriente.",
+    "texto": "Os árabes que mais encantam: Bidaya, Afnan, Maison Asrar e Rayhaan.",
+    "ids": [
+      "MG040",
+      "MG001",
+      "MG082",
+      "MG021"
+    ]
+  },
+  "banner_decants": {
+    "titulo": "Conheça antes de",
+    "destaque": "escolher.",
+    "ids": [
+      "MG092-D",
+      "MG122-D",
+      "MG001-D",
+      "MG082-D"
+    ]
+  },
+  "banner_destaque": {
+    "chamada": "Destaque da semana",
+    "id": "MG134",
+    "texto": "Um dos árabes mais incríveis de todos os tempos."
   }
 }

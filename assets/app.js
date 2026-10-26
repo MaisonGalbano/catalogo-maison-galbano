@@ -162,11 +162,58 @@
       '</div></div>';
   }
 
+  // ── banners da vitrine (config.json): banner_arabes, banner_decants, banner_destaque ──
+  function produtosDe(ids) { return (ids || []).map(function (id) { return porId(String(id).trim().toUpperCase()); }).filter(function (p) { return p && p.img; }); }
+  function itemBanner(p, comPreco) {
+    return '<a class="s-nicho-item" href="p/' + p.slug + '/"><div class="s-nicho-foto"><img src="' + p.img + '" alt="' + esc(nomeTodo(p)) + '" decoding="async"></div>' +
+      '<span class="eyebrow">' + esc(p.marca) + '</span><span class="s-nicho-nome">' + esc(p.nome.replace(' · Decant 5 ml', '')) + '</span>' +
+      (comPreco && p.disponivel && !isNaN(num(p.preco)) ? '<span class="s-ban-preco">' + brl(num(p.preco)) + '</span>' : '') + '</a>';
+  }
+  function slideArabes() {
+    var b = CFG.banner_arabes || {}, ps = produtosDe(b.ids);
+    if (!ps.length) return '';
+    return '<div class="slide s-nicho s-ban-claro"><div class="wrap s-nicho-in">' +
+      '<div class="s-nicho-txt"><p class="eyebrow">' + esc(b.chamada || 'Árabes · Os favoritos') + '</p>' +
+        '<h2 class="h-display">' + esc(b.titulo || 'A intensidade e o luxo do').replace(/$/, '') + ' <em>' + esc(b.destaque || 'Oriente.') + '</em></h2>' +
+        (b.texto ? '<p class="s-nicho-sub">' + esc(b.texto) + '</p>' : '') +
+        '<a class="link-fino" href="#resultado" data-cat-link="Árabes">Ver todos os árabes</a></div>' +
+      '<div class="s-nicho-grade">' + ps.slice(0, 4).map(function (p) { return itemBanner(p, true); }).join('') + '</div>' +
+      '</div></div>';
+  }
+  function slideDecants() {
+    var b = CFG.banner_decants || {};
+    var ps = produtosDe(b.ids);
+    var ds = PRODUTOS.filter(function (p) { return p.pai && p.disponivel && !isNaN(num(p.preco)); });
+    if (!ps.length || !ds.length) return '';
+    var min = Math.min.apply(null, ds.map(function (p) { return num(p.preco); }));
+    return '<div class="slide s-nicho s-ban-off"><div class="wrap s-nicho-in">' +
+      '<div class="s-nicho-txt"><p class="eyebrow">Decants de 5 ml · a partir de ' + brl(min) + '</p>' +
+        '<h2 class="h-display">' + esc(b.titulo || 'Conheça antes de') + ' <em>' + esc(b.destaque || 'escolher.') + '</em></h2>' +
+        '<p class="s-nicho-sub">' + esc(b.texto || 'O perfume original em 5 ml, para descobrir a sua assinatura sem pressa.') + '</p>' +
+        '<div class="s-ban-links"><a class="link-fino" href="#resultado" data-cat-link="Decants" data-dsub="Nicho">Decants Nicho</a>' +
+        '<a class="link-fino" href="#resultado" data-cat-link="Decants" data-dsub="Árabes">Decants Árabes</a></div></div>' +
+      '<div class="s-nicho-grade">' + ps.slice(0, 4).map(function (p) { return itemBanner(p, true); }).join('') + '</div>' +
+      '</div></div>';
+  }
+  function slideDestaque() {
+    var b = CFG.banner_destaque || {}, p = produtosDe([b.id])[0];
+    if (!p) return '';
+    return '<div class="slide s-marca s-ban-dest"><div class="wrap s-marca-grid">' +
+      '<a class="s-marca-img" href="p/' + p.slug + '/"><img src="' + (p.img_ed || p.img) + '" alt="' + esc(nomeTodo(p)) + '"></a>' +
+      '<div class="s-marca-txt"><p class="eyebrow">' + esc(b.chamada || 'Destaque da semana') + ' · ' + esc(p.marca) + '</p>' +
+        '<h2 class="h-display">' + esc(p.nome) + '</h2>' +
+        (b.texto ? '<p class="s-marca-prod">' + esc(b.texto) + '</p>' : '') +
+        '<div class="s-ban-valor">' + valorCompleto(p) + '</div>' +
+        '<div class="s-ban-acoes"><a class="btn" href="' + wa(p) + '" target="_blank" rel="noopener" data-lead="' + esc(p.id) + '">Consultar</a>' +
+        '<a class="link-fino" href="p/' + p.slug + '/">Ver detalhes</a></div></div>' +
+      '</div></div>';
+  }
+
   function vitrine(dest, ms) {
     var slides = [slideInstitucional(dest)];
     var nicho = slideNicho(); if (nicho) slides.unshift(nicho);  // banner dos nichos abre a vitrine
-    ms.forEach(function (m) { if (m.banner) slides.push(slideMarca(m)); });
-    if (dest) ms.forEach(function (m) { if (m.marca === dest.marca && !m.banner && (dest.img_ed || dest.img)) slides.push(slideMarca(m)); });
+    [slideArabes(), slideDecants(), slideDestaque()].forEach(function (s) { if (s) slides.push(s); });
+    ms.forEach(function (m) { if (m.banner) slides.push(slideMarca(m)); });   // banners oficiais das marcas (pasta fotos/marcas)
     slides = slides.slice(0, 7);
     return '<header class="topo"><div class="wrap topo-in">' +
         '<a href="./" class="topo-logo"><img src="assets/logo-maison-galbano.png" alt="Maison Galbano" width="52" height="52"></a>' +

@@ -323,7 +323,7 @@ def main():
 
     versao = hashlib.md5(((RAIZ / 'assets' / 'app.js').read_bytes() + (RAIZ / 'assets' / 'estilo.css').read_bytes())).hexdigest()[:8]
     modelo = (RAIZ / 'src' / 'pagina.html').read_text(encoding='utf-8')
-    config_pub = {'whatsapp': re.sub(r'\D', '', str(cfg.get('whatsapp', ''))), 'meta_pixel_id': str(cfg.get('meta_pixel_id', '')).strip(), 'csv_url': cfg.get('csv_url', ''), 'cartao_acrescimo': cfg.get('cartao_acrescimo', 0), 'parcelas': cfg.get('parcelas', 1), 'decant_faixas': cfg.get('decant_faixas', []), 'banner_nicho': cfg.get('banner_nicho', {})}
+    config_pub = {'whatsapp': re.sub(r'\D', '', str(cfg.get('whatsapp', ''))), 'meta_pixel_id': str(cfg.get('meta_pixel_id', '')).strip(), 'csv_url': cfg.get('csv_url', ''), 'cartao_acrescimo': cfg.get('cartao_acrescimo', 0), 'parcelas': cfg.get('parcelas', 1), 'decant_faixas': cfg.get('decant_faixas', []), 'banner_nicho': cfg.get('banner_nicho', {}), 'banner_arabes': cfg.get('banner_arabes', {}), 'banner_decants': cfg.get('banner_decants', {}), 'banner_destaque': cfg.get('banner_destaque', {})}
 
     def js(o):
         return json.dumps(o, ensure_ascii=False).replace('</', '<\\/')

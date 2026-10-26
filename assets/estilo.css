@@ -500,3 +500,29 @@ section[id] { scroll-margin-top: 76px; }
   .cta-fixa .btn { width: auto; flex: 0 0 auto; padding: 14px 18px; letter-spacing: .12em; }
   .cta-espaco { height: 84px; background: var(--selo); }
 }
+
+/* ── banners extras da vitrine ── */
+.s-ban-claro { background: var(--bege); color: var(--grafite); }
+.s-ban-off { background: var(--off); color: var(--grafite); border-bottom: 1px solid var(--linha); }
+.s-ban-claro .s-nicho-txt .eyebrow, .s-ban-off .s-nicho-txt .eyebrow { color: var(--ouro, #9A7B45); }
+.s-ban-claro .s-nicho-txt .h-display, .s-ban-off .s-nicho-txt .h-display { color: var(--verde); }
+.s-ban-claro .s-nicho-txt .h-display em, .s-ban-off .s-nicho-txt .h-display em { color: var(--champanhe); }
+.s-ban-claro .s-nicho-sub, .s-ban-off .s-nicho-sub { color: var(--grafite-suave); }
+.s-ban-claro .s-nicho-txt .link-fino, .s-ban-off .s-nicho-txt .link-fino { color: var(--verde); }
+.s-ban-claro .s-nicho-nome, .s-ban-off .s-nicho-nome { color: var(--grafite); }
+.s-ban-claro .s-nicho-item .eyebrow, .s-ban-off .s-nicho-item .eyebrow { color: var(--grafite-suave); }
+.s-ban-preco { font-size: 12px; color: var(--grafite-suave); font-variant-numeric: tabular-nums; }
+.s-ban-links { display: flex; flex-wrap: wrap; gap: 10px 24px; }
+.s-ban-dest .s-marca-txt .h-display { font-size: clamp(40px, 10vw, 72px); }
+.s-ban-valor .preco-pix { font-family: var(--display); font-size: 28px; color: var(--grafite); display: block; }
+.s-ban-valor .preco-parc { font-size: 12px; color: var(--grafite-suave); display: block; }
+.s-ban-acoes { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; margin-top: 6px; }
+.s-ban-acoes .btn { width: auto; padding-inline: 28px; }
+@media (max-width: 599px) {
+  .s-ban-claro .s-nicho-grade, .s-ban-off .s-nicho-grade { flex-wrap: nowrap; gap: 8px; }
+  .s-ban-claro .s-nicho-item, .s-ban-off .s-nicho-item { flex: 1 1 0; }
+  .s-ban-claro .s-nicho-nome, .s-ban-off .s-nicho-nome { font-size: 14px; }
+  .s-ban-claro .s-nicho-item .eyebrow, .s-ban-off .s-nicho-item .eyebrow { font-size: 7.5px; letter-spacing: .08em; }
+  .s-ban-preco { font-size: 11px; }
+}
+.s-ban-dest .s-marca-img img { max-height: 58vh; object-fit: contain; }
