@@ -186,7 +186,9 @@
     var ds = PRODUTOS.filter(function (p) { return p.pai && p.disponivel && !isNaN(num(p.preco)); });
     if (!ps.length || !ds.length) return '';
     var min = Math.min.apply(null, ds.map(function (p) { return num(p.preco); }));
-    return '<div class="slide s-nicho s-ban-off"><div class="wrap s-nicho-in">' +
+    // arte pronta para o celular (config.json → banner_decants.imagem_celular); no computador fica o banner montado
+    var arte = b.imagem_celular ? '<a class="s-ban-arte" href="#resultado" data-cat-link="Decants"><img src="' + esc(b.imagem_celular) + '" alt="Decants de 5 ml: nicho e árabes" loading="lazy"></a>' : '';
+    return '<div class="slide s-nicho s-ban-off' + (arte ? ' tem-arte' : '') + '">' + arte + '<div class="wrap s-nicho-in">' +
       '<div class="s-nicho-txt"><p class="eyebrow">Decants de 5 ml · a partir de ' + brl(min) + '</p>' +
         '<h2 class="h-display">' + esc(b.titulo || 'Conheça antes de') + ' <em>' + esc(b.destaque || 'escolher.') + '</em></h2>' +
         '<p class="s-nicho-sub">' + esc(b.texto || 'O perfume original em 5 ml, para descobrir a sua assinatura sem pressa.') + '</p>' +

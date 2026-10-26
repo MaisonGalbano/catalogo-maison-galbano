@@ -527,3 +527,12 @@ section[id] { scroll-margin-top: 76px; }
 }
 .s-ban-dest .s-marca-img img { max-height: 58vh; object-fit: contain; }
 .s-oficial { display: grid; align-items: center; background: #E9DFD2; }
+
+/* arte pronta no celular */
+.s-ban-arte { display: none; }
+@media (max-width: 759px) {
+  .tem-arte .s-ban-arte { display: block; }
+  .tem-arte .s-ban-arte img { width: 100%; height: auto; display: block; }
+  .tem-arte > .wrap { display: none; }
+  .s-ban-off.tem-arte { border-bottom: 0; background: #EDE4D6; }
+}

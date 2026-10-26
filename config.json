@@ -114,7 +114,8 @@
       "MG122-D",
       "MG001-D",
       "MG082-D"
-    ]
+    ],
+    "imagem_celular": "assets/banners/decants-celular.jpg"
   },
   "banner_destaque": {
     "chamada": "Destaque da semana",
