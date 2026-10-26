@@ -471,3 +471,32 @@ section[id] { scroll-margin-top: 76px; }
 .pastas-dec .tile-col .ml { margin: 0; }
 .grupo-dec { grid-column: 1 / -1; font-family: var(--display); font-weight: 400; font-size: clamp(24px, 6vw, 30px); color: var(--verde); margin: 12px 0 -12px; padding-top: 18px; border-top: 1px solid var(--linha); }
 .grupo-dec:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
+
+/* ── acervo: abas + busca + ordenação numa barra que acompanha a rolagem ── */
+.filtro-fixo { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 68px); z-index: 4; background: rgba(247,245,240,.96); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border-bottom: 1px solid var(--linha); }
+.filtro-fixo .wrap { display: grid; gap: 10px; padding-block: 12px; }
+.abas { display: flex; gap: 22px; overflow-x: auto; scrollbar-width: none; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); }
+.abas::-webkit-scrollbar { display: none; }
+.abas button { flex: 0 0 auto; background: none; border: 0; padding: 4px 0 6px; cursor: pointer; font-family: var(--display); font-size: 23px; line-height: 1; color: var(--grafite-suave); border-bottom: 1px solid transparent; display: inline-flex; align-items: baseline; gap: 6px; }
+.abas button .qtd { font-family: var(--texto); font-size: 11px; letter-spacing: .04em; color: var(--grafite-suave); font-variant-numeric: tabular-nums; }
+.abas button[aria-pressed="true"] { color: var(--verde); border-bottom-color: var(--verde); }
+.linha-busca { display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: end; }
+.ordem { border: 0; border-bottom: 1px solid var(--linha); background: transparent; font: inherit; font-size: 13px; color: var(--grafite); padding: 10px 2px; border-radius: 0; max-width: 11.5rem; cursor: pointer; }
+.ordem:focus { outline: none; border-bottom-color: var(--verde); }
+#acervo .ferramentas { margin-top: 18px; }
+#resultado { scroll-margin-top: 190px !important; }
+.selo-esg { display: block; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--grafite-suave); margin-top: 2px; }
+
+/* ── barra fixa de compra (celular) ── */
+.cta-fixa { display: none; }
+@media (max-width: 899px) {
+  .cta-fixa { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 7; align-items: center; justify-content: space-between; gap: 14px;
+    background: rgba(247,245,240,.97); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border-top: 1px solid var(--linha);
+    padding: 10px var(--gutter) calc(10px + env(safe-area-inset-bottom, 0px)); transition: transform .3s ease; }
+  .cta-fixa.oculta { transform: translateY(110%); }
+  .cta-fixa .cta-preco { min-width: 0; font-variant-numeric: tabular-nums; }
+  .cta-fixa .cta-preco .preco-pix { font-family: var(--display); font-size: 21px; color: var(--grafite); line-height: 1.1; }
+  .cta-fixa .cta-preco .preco-parc { font-size: 11px; margin-top: 1px; display: block; }
+  .cta-fixa .btn { width: auto; flex: 0 0 auto; padding: 14px 18px; letter-spacing: .12em; }
+  .cta-espaco { height: 84px; background: var(--selo); }
+}

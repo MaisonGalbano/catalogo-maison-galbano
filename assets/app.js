@@ -23,6 +23,8 @@
   ];
   var marcaSel = '';  // marca escolhida nos quadrinhos de Marcas (filtra o acervo)
   var st = { cat: null, dsub: '', desc: null, perfil: '', familia: '', ocasiao: '', busca: '' };
+  var ordem = 'rec';   // ordenação do acervo
+  var ORDENS = [['rec', 'Recomendados'], ['menor', 'Menor preço'], ['maior', 'Maior preço'], ['az', 'Nome (A–Z)']];
 
   // ── utilidades ──
   function $(s) { return document.querySelector(s); }
@@ -31,6 +33,12 @@
   function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
   function uniq(a) { return a.filter(function (x, i) { return x && a.indexOf(x) === i; }).sort(function (a, b) { return a.localeCompare(b, 'pt-BR'); }); }
   function nomeTodo(p) { return p.marca + ' ' + p.nome; }
+  // busca sem acento e sem diferenciar maiúsculas, por nome, marca, notas, família, ocasião...
+  function norm(s) { return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
+  function textoBusca(p) {
+    return p._busca || (p._busca = norm([p.marca, p.nome, p.concentracao, p.perfil, p.familia_olfativa, p.notas_topo, p.notas_coracao, p.notas_fundo, p.ocasiao, CAT_ROT[p.categoria] || p.categoria, p.colecao].join(' ')));
+  }
+  function linkDe(p) { try { return new URL('p/' + p.slug + '/', document.baseURI).href; } catch (e) { return ''; } }
   function preco(v) {
     var s = String(v || '').replace(/[^\d.,]/g, '');
     if (!s) return 'Consulte';
@@ -67,7 +75,7 @@
   function valorCompleto(p) { return blocoPreco(p, true); }
   function wa(p) {
     var msg = p
-      ? 'Olá! Conheci esta fragrância pelo catálogo Maison Galbano e gostaria de consultar disponibilidade e condições do ' + nomeTodo(p) + '.'
+      ? 'Olá! Conheci esta fragrância pelo catálogo Maison Galbano e gostaria de consultar disponibilidade e condições do ' + nomeTodo(p) + '.\n' + linkDe(p)
       : 'Olá! Conheci o catálogo Maison Galbano e gostaria de falar com um especialista.';
     return 'https://wa.me/' + String(CFG.whatsapp || '').replace(/\D/g, '') + '?text=' + encodeURIComponent(msg);
   }
@@ -90,7 +98,7 @@
     return '<a class="card' + (p.disponivel ? '' : ' sem-estoque') + '" href="p/' + p.slug + '/">' +
       '<div class="foto">' + (p.img ? '<img src="' + p.img + '" alt="' + esc(nomeTodo(p)) + '" loading="lazy" decoding="async">' : '<span class="sem-foto">Foto em breve</span>') + '</div>' +
       '<div class="info"><p class="eyebrow">' + esc(p.marca) + '</p><h3 class="nome">' + esc(p.nome) + '</h3>' +
-      '<span class="preco">' + valor(p) + '</span></div></a>';
+      '<span class="preco">' + valor(p) + (p.disponivel ? '' : '<span class="selo-esg">Esgotado no momento</span>') + '</span></div></a>';
   }
 
   var MARCAS = window.MARCAS || [];
@@ -241,16 +249,20 @@
       '<figure class="filosofia"><blockquote>“Na Maison Galbano, perfume original não é uma escolha. É uma obrigação e uma forma de respeito aos nossos clientes.”</blockquote><figcaption>Edson e Isabel, fundadores</figcaption></figure>' +
     '</div></div></section>' +
 
-    '<section id="acervo" style="padding-top:0"><div class="wrap">' +
-      '<p class="eyebrow" style="margin-bottom:18px">O acervo</p>' +
-      '<ul class="indice">' + CATEGORIAS.map(function (c) {
-        var n = PRODUTOS.filter(function (p) { return p.categoria === (CAT_KEY[c] || c); }).length;
-        return '<li><button type="button" data-cat="' + c + '" aria-pressed="false"><span class="nome-cat">' + c + '</span><span class="qtd">' + (n ? (n < 10 ? '0' + n : n) : 'em breve') + '</span></button></li>';
-      }).join('') + '</ul>' +
+    '<section id="acervo" style="padding-top:0"><div class="wrap"><p class="eyebrow" style="margin-bottom:6px">O acervo</p></div>' +
+      // barra que acompanha a rolagem: abas das coleções + busca + ordenação
+      '<div class="filtro-fixo"><div class="wrap">' +
+        '<div class="abas" role="group" aria-label="Coleções"><button type="button" data-cat="" aria-pressed="true">Todas</button>' + CATEGORIAS.map(function (c) {
+          var n = PRODUTOS.filter(function (p) { return p.categoria === (CAT_KEY[c] || c); }).length;
+          return '<button type="button" data-cat="' + c + '" aria-pressed="false">' + c + '<span class="qtd">' + (n || 'em breve') + '</span></button>';
+        }).join('') + '</div>' +
+        '<div class="linha-busca"><label class="sr" for="busca">Buscar</label><input id="busca" class="busca" type="search" placeholder="Nome, marca ou nota" autocomplete="off">' +
+        '<label class="sr" for="ordem">Ordenar</label><select id="ordem" class="ordem">' + ORDENS.map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === ordem ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></div>' +
+      '</div></div>' +
+      '<div class="wrap">' +
       '<div class="ferramentas">' +
         '<div class="chips">' + DESCOBERTA.map(function (d, i) { return '<button type="button" class="chip" data-desc="' + i + '" aria-pressed="false">' + d.rot + '</button>'; }).join('') + '</div>' +
         '<div class="refinar">' + opcoes('perfil', 'Perfil', perfis, st.perfil) + opcoes('familia', 'Família olfativa', familias, st.familia) + opcoes('ocasiao', 'Ocasião', ocasioes, st.ocasiao) + '</div>' +
-        '<label class="sr" for="busca">Buscar</label><input id="busca" class="busca" type="search" placeholder="Buscar por nome ou marca" autocomplete="off">' +
         '<button type="button" class="limpar" id="limpar" hidden>Limpar filtros</button>' +
       '</div>' +
       '<div class="acervo-topo" id="resultado" style="scroll-margin-top:84px"><h2 class="h-display" id="tituloGrade" style="font-size:30px"></h2><span class="contagem" id="contagem"></span></div>' +
@@ -288,7 +300,7 @@
       '</div><div class="assinatura"><span>Maison Galbano Parfums · São Paulo</span><span>Perfumes 100% originais</span></div></div></section></footer>';
   }
 
-  function barra() { return '<nav class="barra"><div class="wrap"><a href="./#acervo">← Catálogo</a><a class="wm" href="./">Galbano</a></div></nav>'; }
+  function barra() { return '<nav class="barra"><div class="wrap"><a href="./#acervo" id="voltar">← Catálogo</a><a class="wm" href="./">Galbano</a></div></nav>'; }
 
   function niveis(p) { return [['Topo', p.notas_topo], ['Coração', p.notas_coracao], ['Fundo', p.notas_fundo]].filter(function (n) { return n[1]; }); }
   function ficha(p) { return [p.concentracao, p.volume].filter(Boolean).map(esc).join(' · '); }
@@ -307,7 +319,10 @@
         (nv.length ? '<div class="piramide"><h2 class="eyebrow">Pirâmide olfativa</h2>' + nv.map(function (n) { return '<div class="nivel"><span class="rot">' + n[0] + '</span><span class="notas">' + esc(n[1]) + '</span></div>'; }).join('') + '</div>' : '') +
         (dados.length ? '<dl class="dados">' + dados.map(function (d) { return '<div><dt>' + d[0] + '</dt><dd>' + esc(d[1]) + '</dd></div>'; }).join('') + '</dl>' : '') +
         (p.destaque ? '<a class="editorial-link" href="d/' + p.slug + '/"><span class="eyebrow">Seleção Maison Galbano</span><span>Ler a página editorial →</span></a>' : '') +
-      '</article></div>' + rodape();
+      '</article></div>' + rodape() +
+      // barra fixa de compra no celular: aparece quando o botão principal sai da tela
+      '<div class="cta-espaco"></div><div class="cta-fixa oculta" id="ctaFixa"><div class="cta-preco">' + valor(p) + '</div>' +
+      '<a class="btn" href="' + wa(p) + '" target="_blank" rel="noopener" data-lead="' + esc(p.id) + '">Consultar</a></div>';
   }
 
   function destaque(p) {
@@ -330,8 +345,10 @@
   function aplicar() {
     var g = $('#grade'); if (!g) return;
     var b = st.busca;
+    var termos = norm(b).split(/\s+/).filter(Boolean);
     var res = PRODUTOS.filter(function (p) {
-      return (!p.pai || st.cat === 'Decants' || b) &&
+      // decants só aparecem na aba Decants (ou na busca, quando o perfume é vendido só em decant)
+      return (!p.pai || st.cat === 'Decants' || (b && !porId(p.pai))) &&
         (!marcaSel || p.marca === marcaSel) &&
         (!st.cat || p.categoria === (CAT_KEY[st.cat] || st.cat)) &&
         (st.cat !== 'Decants' || !st.dsub || p.colecao === st.dsub) &&
@@ -339,9 +356,20 @@
         (!st.perfil || p.perfil === st.perfil) &&
         (!st.familia || p.familia_olfativa === st.familia) &&
         (!st.ocasiao || lista(p.ocasiao).map(cap).indexOf(st.ocasiao) > -1) &&
-        (!b || nomeTodo(p).toLowerCase().indexOf(b) > -1);
+        termos.every(function (x) { return textoBusca(p).indexOf(x) > -1; });
     });
-    var titulo = marcaSel || (st.desc !== null ? DESCOBERTA[st.desc].rot : (st.cat === 'Decants' && st.dsub ? 'Decants ' + st.dsub : (st.cat || 'Todas as fragrâncias')));
+    // ordenação: (nos decants, a divisão primeiro) → esgotados no fim → critério escolhido
+    var grp = { 'Nicho': 0, 'Árabes': 1, 'Importados': 2 };
+    var pr = function (p) { var n = num(p.preco); return isNaN(n) ? null : n; };
+    var cmp = { menor: function (x, y) { return (pr(x) === null ? 1e9 : pr(x)) - (pr(y) === null ? 1e9 : pr(y)); },
+                maior: function (x, y) { return (pr(y) === null ? -1 : pr(y)) - (pr(x) === null ? -1 : pr(x)); },
+                az: function (x, y) { return nomeTodo(x).localeCompare(nomeTodo(y), 'pt-BR'); } }[ordem] || function () { return 0; };
+    res = res.map(function (p, i) { return [p, i]; }).sort(function (A, B) {
+      var x = A[0], y = B[0];
+      return (st.cat === 'Decants' ? (grp[x.colecao] || 0) - (grp[y.colecao] || 0) : 0) ||
+        (x.disponivel ? 0 : 1) - (y.disponivel ? 0 : 1) || cmp(x, y) || A[1] - B[1];
+    }).map(function (a) { return a[0]; });
+    var titulo = marcaSel || (termos.length ? 'Busca: “' + st.busca + '”' : null) || (st.desc !== null ? DESCOBERTA[st.desc].rot : (st.cat === 'Decants' && st.dsub ? 'Decants ' + st.dsub : (st.cat || 'Todas as fragrâncias')));
     var sd = $('#subdec');
     if (sd) { sd.hidden = st.cat !== 'Decants'; [].forEach.call(sd.querySelectorAll('[data-dsub]'), function (el) { el.setAttribute('aria-pressed', el.getAttribute('data-dsub') === (st.dsub || '')); }); }
     $('#tituloGrade').textContent = titulo;
@@ -352,16 +380,22 @@
       var cab = (st.cat === 'Decants' && !st.dsub && p.colecao && p.colecao !== ult) ? '<h3 class="grupo-dec">Decants ' + p.colecao + '</h3>' : '';
       if (p.colecao) ult = p.colecao;
       return cab + card(p);
-    }).join('') : '<p class="vazio">Nenhuma fragrância com essa combinação. Novas chegam em breve.</p>';
-    [].forEach.call(document.querySelectorAll('[data-cat]'), function (el) { el.setAttribute('aria-pressed', el.getAttribute('data-cat') === st.cat); });
+    }).join('') : '<p class="vazio">' + (termos.length ? 'Nenhuma fragrância encontrada. Tente outro nome, marca ou nota.' : 'Nenhuma fragrância com essa combinação. Novas chegam em breve.') + '</p>';
+    [].forEach.call(document.querySelectorAll('[data-cat]'), function (el) { el.setAttribute('aria-pressed', (el.getAttribute('data-cat') || null) === st.cat); });
     [].forEach.call(document.querySelectorAll('[data-desc]'), function (el) { el.setAttribute('aria-pressed', Number(el.getAttribute('data-desc')) === st.desc); });
     $('#limpar').hidden = !(marcaSel || st.cat || st.desc !== null || st.perfil || st.familia || st.ocasiao || st.busca);
+  }
+
+  function iniciarCtaFixa() {
+    var bar = $('#ctaFixa'), alvo = document.querySelector('.acoes .btn');
+    if (!bar || !alvo || !('IntersectionObserver' in window)) { if (bar) bar.classList.remove('oculta'); return; }
+    new IntersectionObserver(function (en) { bar.classList.toggle('oculta', en[0].isIntersecting); }).observe(alvo);
   }
 
   // ── render ──
   function render() {
     var app = $('#app'), p;
-    if (ROTA.indexOf('p:') === 0 && (p = porSlug(ROTA.slice(2)))) { app.innerHTML = pagina(p); track('ViewContent', p); }
+    if (ROTA.indexOf('p:') === 0 && (p = porSlug(ROTA.slice(2)))) { app.innerHTML = pagina(p); track('ViewContent', p); iniciarCtaFixa(); }
     else if (ROTA.indexOf('d:') === 0 && (p = porSlug(ROTA.slice(2)))) { app.innerHTML = destaque(p); track('ViewContent', p); }
     else { app.innerHTML = home(); aplicar(); iniciarVitrine(); }
   }
@@ -369,6 +403,8 @@
   document.addEventListener('click', function (e) {
     var t = e.target.closest ? e.target : e.target.parentNode;
     var el;
+    // "← Catálogo": se veio do catálogo, volta para o mesmo ponto da lista
+    if (t.closest('#voltar') && document.referrer.indexOf(location.origin) === 0 && history.length > 1) { e.preventDefault(); history.back(); return; }
     // links internos (#acervo, #resultado...): rola até lá sem recarregar a página
     // (links do Instagram/anúncios chegam com ?fbclid=... e o navegador recarregaria)
     var ancora = t.closest('a[href^="#"]');
@@ -382,7 +418,7 @@
       var bm = $('#busca'); if (bm) bm.value = ''; [].forEach.call(document.querySelectorAll('[data-filtro]'), function (s) { s.value = ''; }); aplicar(); return;
     }
     if ((el = t.closest('[data-dsub]')) && !el.hasAttribute('data-cat-link')) { st.cat = 'Decants'; st.dsub = el.getAttribute('data-dsub'); st.desc = null; aplicar(); return; }
-    if ((el = t.closest('[data-cat]'))) { var c = el.getAttribute('data-cat'); st.cat = st.cat === c ? null : c; st.dsub = ''; st.desc = null; aplicar(); return; }
+    if ((el = t.closest('[data-cat]'))) { st.cat = el.getAttribute('data-cat') || null; st.dsub = ''; st.desc = null; aplicar(); if (el.scrollIntoView) el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); return; }
     if ((el = t.closest('[data-cat-link]'))) { st.cat = el.getAttribute('data-cat-link'); st.dsub = el.getAttribute('data-dsub') || ''; st.desc = null; aplicar(); }
     if ((el = t.closest('[data-busca]'))) { st = { cat: null, dsub: '', desc: null, perfil: '', familia: '', ocasiao: '', busca: el.getAttribute('data-busca').toLowerCase() }; var bi = $('#busca'); if (bi) bi.value = el.getAttribute('data-busca'); aplicar(); }
     if ((el = t.closest('[data-desc]'))) { var i = Number(el.getAttribute('data-desc')); st.desc = st.desc === i ? null : i; st.cat = null; aplicar(); return; }
@@ -399,7 +435,8 @@
       else toast('Copie o link na barra do navegador');
     }
   });
-  document.addEventListener('input', function (e) { if (e.target.id === 'busca') { marcaSel = ''; st.busca = e.target.value.trim().toLowerCase(); aplicar(); } });
+  document.addEventListener('input', function (e) { if (e.target.id === 'busca') { marcaSel = ''; st.busca = e.target.value.trim(); aplicar(); } });
+  document.addEventListener('change', function (e) { if (e.target.id === 'ordem') { ordem = e.target.value; aplicar(); } });
   document.addEventListener('change', function (e) { var f = e.target.getAttribute && e.target.getAttribute('data-filtro'); if (f) { st[f] = e.target.value; aplicar(); } });
 
   // ── preço e disponibilidade ao vivo da planilha (o resto atualiza a cada publicação) ──
