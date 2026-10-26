@@ -104,7 +104,8 @@
       "MG001",
       "MG082",
       "MG021"
-    ]
+    ],
+    "imagem_celular": "assets/banners/arabes-celular.jpg"
   },
   "banner_decants": {
     "titulo": "Conheça antes de",

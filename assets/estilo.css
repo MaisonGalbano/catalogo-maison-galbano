@@ -536,3 +536,4 @@ section[id] { scroll-margin-top: 76px; }
   .tem-arte > .wrap { display: none; }
   .s-ban-off.tem-arte { border-bottom: 0; background: #EDE4D6; }
 }
+@media (max-width: 759px) { .s-ban-claro.tem-arte { background: #EDE3D3; } }

@@ -172,7 +172,9 @@
   function slideArabes() {
     var b = CFG.banner_arabes || {}, ps = produtosDe(b.ids);
     if (!ps.length) return '';
-    return '<div class="slide s-nicho s-ban-claro"><div class="wrap s-nicho-in">' +
+    // arte pronta para o celular (config.json → banner_arabes.imagem_celular); no computador fica o banner montado
+    var arte = b.imagem_celular ? '<a class="s-ban-arte" href="#resultado" data-cat-link="Árabes"><img src="' + esc(b.imagem_celular) + '" alt="Árabes: os favoritos" loading="lazy"></a>' : '';
+    return '<div class="slide s-nicho s-ban-claro' + (arte ? ' tem-arte' : '') + '">' + arte + '<div class="wrap s-nicho-in">' +
       '<div class="s-nicho-txt"><p class="eyebrow">' + esc(b.chamada || 'Árabes · Os favoritos') + '</p>' +
         '<h2 class="h-display">' + esc(b.titulo || 'A intensidade e o luxo do').replace(/$/, '') + ' <em>' + esc(b.destaque || 'Oriente.') + '</em></h2>' +
         (b.texto ? '<p class="s-nicho-sub">' + esc(b.texto) + '</p>' : '') +
