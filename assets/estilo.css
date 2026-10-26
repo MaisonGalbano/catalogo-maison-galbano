@@ -526,3 +526,4 @@ section[id] { scroll-margin-top: 76px; }
   .s-ban-preco { font-size: 11px; }
 }
 .s-ban-dest .s-marca-img img { max-height: 58vh; object-fit: contain; }
+.s-oficial { display: grid; align-items: center; background: #E9DFD2; }

@@ -212,8 +212,8 @@
   function vitrine(dest, ms) {
     var slides = [slideInstitucional(dest)];
     var nicho = slideNicho(); if (nicho) slides.unshift(nicho);  // banner dos nichos abre a vitrine
+    ms.forEach(function (m) { if (m.banner) slides.push(slideMarca(m)); });   // banners das marcas (pasta fotos/marcas) logo depois da capa
     [slideArabes(), slideDecants(), slideDestaque()].forEach(function (s) { if (s) slides.push(s); });
-    ms.forEach(function (m) { if (m.banner) slides.push(slideMarca(m)); });   // banners oficiais das marcas (pasta fotos/marcas)
     slides = slides.slice(0, 7);
     return '<header class="topo"><div class="wrap topo-in">' +
         '<a href="./" class="topo-logo"><img src="assets/logo-maison-galbano.png" alt="Maison Galbano" width="52" height="52"></a>' +
