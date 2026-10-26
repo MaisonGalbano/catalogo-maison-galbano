@@ -54,7 +54,8 @@
     var n = num(p.preco);
     if (isNaN(n)) return '<span class="preco-pix">Consulte</span>';
     var k = Number(CFG.parcelas || 0), a = Number(CFG.cartao_acrescimo || 0);
-    var h = '<span class="preco-pix">' + brl(n) + ' <small>no Pix</small></span>';
+    var de = num(p.preco_de);   // preço "de" (riscado), quando há promoção
+    var h = '<span class="preco-pix">' + (!isNaN(de) && de > n ? '<s class="preco-de">' + brl(de) + '</s> ' : '') + brl(n) + ' <small>no Pix</small></span>';
     if (k > 1 && p.categoria !== 'Decant') {
       var parcela = Math.ceil(Math.round(n * 100 * (1 + a / 100)) / k) / 100;
       h += '<span class="preco-parc">ou ' + k + 'x de ' + brl(parcela) + ' sem juros' +

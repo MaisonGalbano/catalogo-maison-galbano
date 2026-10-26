@@ -459,3 +459,6 @@ section[id] { scroll-margin-top: 76px; }
 /* ── decants: abas Árabes · Importados · Nicho ── */
 .subdec { margin: 14px 0 4px; }
 .links-dec { display: flex; flex-wrap: wrap; gap: 12px 28px; }
+
+/* ── promoção: preço "de" riscado ── */
+.preco-de { color: var(--grafite-suave); font-size: .82em; margin-right: 4px; font-weight: 400; }

@@ -21,7 +21,7 @@ SELO = (9, 30, 15)
 
 COLUNAS = ['id', 'marca', 'nome', 'concentracao', 'volume', 'categoria', 'perfil', 'familia_olfativa',
            'notas_topo', 'notas_coracao', 'notas_fundo', 'ocasiao', 'descricao_sensorial', 'preco',
-           'disponivel', 'destaque', 'imagem', 'preco_decant']
+           'disponivel', 'destaque', 'imagem', 'preco_decant', 'preco_decant_de']
 
 
 def sem_acento(s):
@@ -232,6 +232,7 @@ def main():
             'id': pid, 'slug': slug, 'marca': marca, 'nome': nome,
             **{k: r.get(k, '').strip() for k in COLUNAS if k not in ('id', 'marca', 'nome', 'disponivel', 'destaque', 'imagem')},
             'disponivel': not sem_acento(r.get('disponivel', 'sim')).strip().lower().startswith('n'),
+            'so_decant': 'decant' in sem_acento(r.get('disponivel', '')).lower(),  # disponivel = "só decant": o frasco não aparece, só o decant
             'destaque': sim(r.get('destaque', '')),
             'img': img, 'img_ed': img_ed,
         })
@@ -272,11 +273,11 @@ def main():
                 avisos.append(f"decant {p['id']}: foto com problema ({e})")
         decants.append({**p, 'id': p['id'] + '-D', 'pai': p['id'], 'slug': p['slug'] + '-decant',
                         'nome': p['nome'] + ' · Decant 5 ml', 'categoria': 'Decant', 'colecao': colecao.get(cat, p['categoria']), 'volume': '5 ml',
-                        'preco': pd, 'disponivel': True if proprio is not None else p['disponivel'], 'destaque': False, 'img': img, 'img_ed': '',
+                        'preco': pd, 'preco_de': (f"{numero(p.get('preco_decant_de')):.2f}".replace('.', ',') if numero(p.get('preco_decant_de')) is not None else ''), 'disponivel': True if proprio is not None else p['disponivel'], 'destaque': False, 'img': img, 'img_ed': '',
                         'descricao_sensorial': 'Decant de 5 ml com o perfume original, para conhecer a fragrância antes do frasco completo. ' + p['descricao_sensorial']})
     ordem = {'Árabes': 0, 'Importados': 1, 'Nicho': 2}
     decants.sort(key=lambda d: ordem.get(d['colecao'], 9))
-    produtos += decants
+    produtos = [p for p in produtos if not p.get('so_decant')] + decants  # "só decant": o frasco sai do catálogo
 
     if not produtos:
         sys.exit('ERRO: nenhum produto com id e nome na planilha. O site atual foi mantido.')
