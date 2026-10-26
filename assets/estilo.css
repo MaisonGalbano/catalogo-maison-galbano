@@ -462,3 +462,9 @@ section[id] { scroll-margin-top: 76px; }
 
 /* ── promoção: preço "de" riscado ── */
 .preco-de { color: var(--grafite-suave); font-size: .82em; margin-right: 4px; font-weight: 400; }
+
+/* ── pastas de decants ── */
+.pastas-dec { grid-column: 1 / -1; margin-top: 8px; }
+.pastas-dec .tile-col { background: var(--off); }
+.pastas-dec .tile-col.vazia { opacity: .6; }
+.pastas-dec .tile-col .ml { margin: 0; }

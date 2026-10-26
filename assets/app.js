@@ -196,6 +196,18 @@
       }).join('');
   }
 
+  // pastas de decants: Nicho · Árabes · Importados (pasta vazia aparece como "em breve")
+  function pastasDecant() {
+    return '<div class="pastas-dec grade-col">' + ['Nicho', 'Árabes', 'Importados'].map(function (c) {
+      var ds = PRODUTOS.filter(function (p) { return p.pai && p.colecao === c; });
+      var capa = ds.filter(function (p) { return p.img; })[0];
+      var txt = '<div class="txt"><span class="nome-col">Decants ' + c + '</span><small>' + (ds.length ? ds.length + (ds.length === 1 ? ' decant' : ' decants') + ' de 5 ml' : 'Em breve') + '</small></div>';
+      var foto = '<div class="foto">' + (capa ? '<img src="' + capa.img + '" alt="" loading="lazy">' : '<p class="ml">5<small>ml</small></p>') + '</div>';
+      return ds.length ? '<a href="#resultado" class="tile-col" data-cat-link="Decants" data-dsub="' + c + '">' + foto + txt + '</a>'
+                       : '<div class="tile-col vazia">' + foto + txt + '</div>';
+    }).join('') + '</div>';
+  }
+
   // carrossel: passa sozinho; para quando a pessoa mexe
   function iniciarVitrine() {
     var tr = $('#trilho'), pts = [].slice.call(document.querySelectorAll('#pontos button'));
@@ -260,7 +272,7 @@
       '<p class="ml">5<small>ml</small></p>' +
       '<div style="display:grid;gap:18px" class="measure"><p class="eyebrow">Decants</p><h2 class="h-display">Descubra antes de escolher.</h2>' +
       '<p>Grandes fragrâncias merecem ser descobertas sem pressa. Nossos decants permitem explorar diferentes universos olfativos antes de investir no frasco completo.</p>' +
-      '<div class="links-dec">' + ['Árabes', 'Importados', 'Nicho'].map(function (c) { return '<a class="link-fino" href="#resultado" data-cat-link="Decants" data-dsub="' + c + '">Decants ' + c + '</a>'; }).join('') + '</div></div>' +
+      '</div>' + pastasDecant() +
       '<div id="kits" hidden><!-- Reservado: discovery sets e kits de 3 e 5 decants --></div>' +
     '</div></section>' + rodape();
   }
