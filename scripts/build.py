@@ -232,7 +232,8 @@ def main():
             'id': pid, 'slug': slug, 'marca': marca, 'nome': nome,
             **{k: r.get(k, '').strip() for k in COLUNAS if k not in ('id', 'marca', 'nome', 'disponivel', 'destaque', 'imagem')},
             'disponivel': not sem_acento(r.get('disponivel', 'sim')).strip().lower().startswith('n'),
-            'so_decant': 'decant' in sem_acento(r.get('disponivel', '')).lower(),  # disponivel = "só decant": o frasco não aparece, só o decant
+            # só decant: disponivel = "só decant", ou preço do frasco vazio com preco_decant preenchido → o frasco não aparece
+            'so_decant': 'decant' in sem_acento(r.get('disponivel', '')).lower() or (not r.get('preco', '').strip() and bool(r.get('preco_decant', '').strip())),
             'destaque': sim(r.get('destaque', '')),
             'img': img, 'img_ed': img_ed,
         })
