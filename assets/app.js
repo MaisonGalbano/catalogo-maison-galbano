@@ -247,8 +247,6 @@
         var n = PRODUTOS.filter(function (p) { return p.categoria === (CAT_KEY[c] || c); }).length;
         return '<li><button type="button" data-cat="' + c + '" aria-pressed="false"><span class="nome-cat">' + c + '</span><span class="qtd">' + (n ? (n < 10 ? '0' + n : n) : 'em breve') + '</span></button></li>';
       }).join('') + '</ul>' +
-      '<div class="chips subdec" id="subdec" hidden>' + [['', 'Todos os decants'], ['Árabes', 'Decants Árabes'], ['Importados', 'Decants Importados'], ['Nicho', 'Decants Nicho']].map(function (d) {
-        return '<button type="button" class="chip" data-dsub="' + d[0] + '" aria-pressed="false">' + d[1] + '</button>'; }).join('') + '</div>' +
       '<div class="ferramentas">' +
         '<div class="chips">' + DESCOBERTA.map(function (d, i) { return '<button type="button" class="chip" data-desc="' + i + '" aria-pressed="false">' + d.rot + '</button>'; }).join('') + '</div>' +
         '<div class="refinar">' + opcoes('perfil', 'Perfil', perfis, st.perfil) + opcoes('familia', 'Família olfativa', familias, st.familia) + opcoes('ocasiao', 'Ocasião', ocasioes, st.ocasiao) + '</div>' +
@@ -256,6 +254,9 @@
         '<button type="button" class="limpar" id="limpar" hidden>Limpar filtros</button>' +
       '</div>' +
       '<div class="acervo-topo" id="resultado" style="scroll-margin-top:84px"><h2 class="h-display" id="tituloGrade" style="font-size:30px"></h2><span class="contagem" id="contagem"></span></div>' +
+      // divisão dos decants (Nicho · Árabes · Importados) aparece antes dos frascos
+      '<div class="chips subdec" id="subdec" hidden>' + [['', 'Todos os decants'], ['Nicho', 'Decants Nicho'], ['Árabes', 'Decants Árabes'], ['Importados', 'Decants Importados']].map(function (d) {
+        return '<button type="button" class="chip" data-dsub="' + d[0] + '" aria-pressed="false">' + d[1] + '</button>'; }).join('') + '</div>' +
       '<div class="grade" id="grade"></div>' +
     '</div></section>' +
 
@@ -345,7 +346,13 @@
     if (sd) { sd.hidden = st.cat !== 'Decants'; [].forEach.call(sd.querySelectorAll('[data-dsub]'), function (el) { el.setAttribute('aria-pressed', el.getAttribute('data-dsub') === (st.dsub || '')); }); }
     $('#tituloGrade').textContent = titulo;
     $('#contagem').textContent = res.length + (res.length === 1 ? ' fragrância' : ' fragrâncias');
-    g.innerHTML = res.length ? res.map(card).join('') : '<p class="vazio">Nenhuma fragrância com essa combinação. Novas chegam em breve.</p>';
+    var ult = null;
+    g.innerHTML = res.length ? res.map(function (p) {
+      // em "Todos os decants", cada divisão ganha o seu título antes dos frascos
+      var cab = (st.cat === 'Decants' && !st.dsub && p.colecao && p.colecao !== ult) ? '<h3 class="grupo-dec">Decants ' + p.colecao + '</h3>' : '';
+      if (p.colecao) ult = p.colecao;
+      return cab + card(p);
+    }).join('') : '<p class="vazio">Nenhuma fragrância com essa combinação. Novas chegam em breve.</p>';
     [].forEach.call(document.querySelectorAll('[data-cat]'), function (el) { el.setAttribute('aria-pressed', el.getAttribute('data-cat') === st.cat); });
     [].forEach.call(document.querySelectorAll('[data-desc]'), function (el) { el.setAttribute('aria-pressed', Number(el.getAttribute('data-desc')) === st.desc); });
     $('#limpar').hidden = !(marcaSel || st.cat || st.desc !== null || st.perfil || st.familia || st.ocasiao || st.busca);

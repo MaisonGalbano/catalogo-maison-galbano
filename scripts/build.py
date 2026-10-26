@@ -276,7 +276,7 @@ def main():
                         'nome': p['nome'] + ' · Decant 5 ml', 'categoria': 'Decant', 'colecao': colecao.get(cat, p['categoria']), 'volume': '5 ml',
                         'preco': pd, 'preco_de': (f"{numero(p.get('preco_decant_de')):.2f}".replace('.', ',') if numero(p.get('preco_decant_de')) is not None else ''), 'disponivel': True if proprio is not None else p['disponivel'], 'destaque': False, 'img': img, 'img_ed': '',
                         'descricao_sensorial': 'Decant de 5 ml com o perfume original, para conhecer a fragrância antes do frasco completo. ' + p['descricao_sensorial']})
-    ordem = {'Árabes': 0, 'Importados': 1, 'Nicho': 2}
+    ordem = {'Nicho': 0, 'Árabes': 1, 'Importados': 2}
     decants.sort(key=lambda d: ordem.get(d['colecao'], 9))
     produtos = [p for p in produtos if not p.get('so_decant')] + decants  # "só decant": o frasco sai do catálogo
 

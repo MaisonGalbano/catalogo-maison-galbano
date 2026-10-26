@@ -457,7 +457,8 @@ section[id] { scroll-margin-top: 76px; }
 .sec-col { padding-block: clamp(48px, 10vw, 88px) 0; }
 
 /* ── decants: abas Árabes · Importados · Nicho ── */
-.subdec { margin: 14px 0 4px; }
+.subdec { margin: 0 0 28px; gap: 10px; }
+.subdec .chip { font-size: 13px; padding: 10px 18px; }
 .links-dec { display: flex; flex-wrap: wrap; gap: 12px 28px; }
 
 /* ── promoção: preço "de" riscado ── */
@@ -468,3 +469,5 @@ section[id] { scroll-margin-top: 76px; }
 .pastas-dec .tile-col { background: var(--off); }
 .pastas-dec .tile-col.vazia { opacity: .6; }
 .pastas-dec .tile-col .ml { margin: 0; }
+.grupo-dec { grid-column: 1 / -1; font-family: var(--display); font-weight: 400; font-size: clamp(24px, 6vw, 30px); color: var(--verde); margin: 12px 0 -12px; padding-top: 18px; border-top: 1px solid var(--linha); }
+.grupo-dec:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
