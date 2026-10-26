@@ -455,3 +455,7 @@ section[id] { scroll-margin-top: 76px; }
 .tile-col small { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--grafite-suave); }
 .tile-col:hover .nome-col { color: var(--ouro); }
 .sec-col { padding-block: clamp(48px, 10vw, 88px) 0; }
+
+/* ── decants: abas Árabes · Importados · Nicho ── */
+.subdec { margin: 14px 0 4px; }
+.links-dec { display: flex; flex-wrap: wrap; gap: 12px 28px; }

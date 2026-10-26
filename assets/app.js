@@ -22,7 +22,7 @@
     { rot: 'Seleção Maison Galbano', f: function (p) { return p.destaque; } }
   ];
   var marcaSel = '';  // marca escolhida nos quadrinhos de Marcas (filtra o acervo)
-  var st = { cat: null, desc: null, perfil: '', familia: '', ocasiao: '', busca: '' };
+  var st = { cat: null, dsub: '', desc: null, perfil: '', familia: '', ocasiao: '', busca: '' };
 
   // ── utilidades ──
   function $(s) { return document.querySelector(s); }
@@ -234,6 +234,8 @@
         var n = PRODUTOS.filter(function (p) { return p.categoria === (CAT_KEY[c] || c); }).length;
         return '<li><button type="button" data-cat="' + c + '" aria-pressed="false"><span class="nome-cat">' + c + '</span><span class="qtd">' + (n ? (n < 10 ? '0' + n : n) : 'em breve') + '</span></button></li>';
       }).join('') + '</ul>' +
+      '<div class="chips subdec" id="subdec" hidden>' + [['', 'Todos os decants'], ['Árabes', 'Decants Árabes'], ['Importados', 'Decants Importados'], ['Nicho', 'Decants Nicho']].map(function (d) {
+        return '<button type="button" class="chip" data-dsub="' + d[0] + '" aria-pressed="false">' + d[1] + '</button>'; }).join('') + '</div>' +
       '<div class="ferramentas">' +
         '<div class="chips">' + DESCOBERTA.map(function (d, i) { return '<button type="button" class="chip" data-desc="' + i + '" aria-pressed="false">' + d.rot + '</button>'; }).join('') + '</div>' +
         '<div class="refinar">' + opcoes('perfil', 'Perfil', perfis, st.perfil) + opcoes('familia', 'Família olfativa', familias, st.familia) + opcoes('ocasiao', 'Ocasião', ocasioes, st.ocasiao) + '</div>' +
@@ -257,7 +259,7 @@
       '<p class="ml">5<small>ml</small></p>' +
       '<div style="display:grid;gap:18px" class="measure"><p class="eyebrow">Decants</p><h2 class="h-display">Descubra antes de escolher.</h2>' +
       '<p>Grandes fragrâncias merecem ser descobertas sem pressa. Nossos decants permitem explorar diferentes universos olfativos antes de investir no frasco completo.</p>' +
-      '<a class="link-fino" href="#resultado" data-cat-link="Decants">Ver decants</a></div>' +
+      '<div class="links-dec">' + ['Árabes', 'Importados', 'Nicho'].map(function (c) { return '<a class="link-fino" href="#resultado" data-cat-link="Decants" data-dsub="' + c + '">Decants ' + c + '</a>'; }).join('') + '</div></div>' +
       '<div id="kits" hidden><!-- Reservado: discovery sets e kits de 3 e 5 decants --></div>' +
     '</div></section>' + rodape();
   }
@@ -318,13 +320,16 @@
       return (!p.pai || st.cat === 'Decants' || b) &&
         (!marcaSel || p.marca === marcaSel) &&
         (!st.cat || p.categoria === (CAT_KEY[st.cat] || st.cat)) &&
+        (st.cat !== 'Decants' || !st.dsub || p.colecao === st.dsub) &&
         (st.desc === null || DESCOBERTA[st.desc].f(p)) &&
         (!st.perfil || p.perfil === st.perfil) &&
         (!st.familia || p.familia_olfativa === st.familia) &&
         (!st.ocasiao || lista(p.ocasiao).map(cap).indexOf(st.ocasiao) > -1) &&
         (!b || nomeTodo(p).toLowerCase().indexOf(b) > -1);
     });
-    var titulo = marcaSel || (st.desc !== null ? DESCOBERTA[st.desc].rot : (st.cat || 'Todas as fragrâncias'));
+    var titulo = marcaSel || (st.desc !== null ? DESCOBERTA[st.desc].rot : (st.cat === 'Decants' && st.dsub ? 'Decants ' + st.dsub : (st.cat || 'Todas as fragrâncias')));
+    var sd = $('#subdec');
+    if (sd) { sd.hidden = st.cat !== 'Decants'; [].forEach.call(sd.querySelectorAll('[data-dsub]'), function (el) { el.setAttribute('aria-pressed', el.getAttribute('data-dsub') === (st.dsub || '')); }); }
     $('#tituloGrade').textContent = titulo;
     $('#contagem').textContent = res.length + (res.length === 1 ? ' fragrância' : ' fragrâncias');
     g.innerHTML = res.length ? res.map(card).join('') : '<p class="vazio">Nenhuma fragrância com essa combinação. Novas chegam em breve.</p>';
@@ -351,18 +356,19 @@
       var alvo = document.getElementById(ancora.getAttribute('href').slice(1));
       if (alvo) { e.preventDefault(); setTimeout(function () { alvo.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 0); }
     }
-    if (t.closest('[data-cat],[data-cat-link],[data-busca],[data-desc]') || t.id === 'limpar') marcaSel = '';
+    if (t.closest('[data-cat],[data-cat-link],[data-dsub],[data-busca],[data-desc]') || t.id === 'limpar') marcaSel = '';
     if ((el = t.closest('[data-marca]'))) {
-      st = { cat: null, desc: null, perfil: '', familia: '', ocasiao: '', busca: '' }; marcaSel = el.getAttribute('data-marca');
+      st = { cat: null, dsub: '', desc: null, perfil: '', familia: '', ocasiao: '', busca: '' }; marcaSel = el.getAttribute('data-marca');
       var bm = $('#busca'); if (bm) bm.value = ''; [].forEach.call(document.querySelectorAll('[data-filtro]'), function (s) { s.value = ''; }); aplicar(); return;
     }
-    if ((el = t.closest('[data-cat]'))) { var c = el.getAttribute('data-cat'); st.cat = st.cat === c ? null : c; st.desc = null; aplicar(); return; }
-    if ((el = t.closest('[data-cat-link]'))) { st.cat = el.getAttribute('data-cat-link'); st.desc = null; aplicar(); }
-    if ((el = t.closest('[data-busca]'))) { st = { cat: null, desc: null, perfil: '', familia: '', ocasiao: '', busca: el.getAttribute('data-busca').toLowerCase() }; var bi = $('#busca'); if (bi) bi.value = el.getAttribute('data-busca'); aplicar(); }
+    if ((el = t.closest('[data-dsub]')) && !el.hasAttribute('data-cat-link')) { st.cat = 'Decants'; st.dsub = el.getAttribute('data-dsub'); st.desc = null; aplicar(); return; }
+    if ((el = t.closest('[data-cat]'))) { var c = el.getAttribute('data-cat'); st.cat = st.cat === c ? null : c; st.dsub = ''; st.desc = null; aplicar(); return; }
+    if ((el = t.closest('[data-cat-link]'))) { st.cat = el.getAttribute('data-cat-link'); st.dsub = el.getAttribute('data-dsub') || ''; st.desc = null; aplicar(); }
+    if ((el = t.closest('[data-busca]'))) { st = { cat: null, dsub: '', desc: null, perfil: '', familia: '', ocasiao: '', busca: el.getAttribute('data-busca').toLowerCase() }; var bi = $('#busca'); if (bi) bi.value = el.getAttribute('data-busca'); aplicar(); }
     if ((el = t.closest('[data-desc]'))) { var i = Number(el.getAttribute('data-desc')); st.desc = st.desc === i ? null : i; st.cat = null; aplicar(); return; }
     if ((el = t.closest('[data-lead]'))) track('Lead', porId(el.getAttribute('data-lead')));
     if (t.id === 'limpar') {
-      st = { cat: null, desc: null, perfil: '', familia: '', ocasiao: '', busca: '' };
+      st = { cat: null, dsub: '', desc: null, perfil: '', familia: '', ocasiao: '', busca: '' };
       $('#busca').value = ''; [].forEach.call(document.querySelectorAll('[data-filtro]'), function (s) { s.value = ''; }); aplicar();
     }
     if (t.id === 'copiar') {
@@ -414,7 +420,9 @@
           var novo = d.preco, disp = pai.disponivel;
           if (proprio && !isNaN(num(proprio))) { novo = proprio; disp = true; }
           else {
-            var n = num(pai.preco), f = CFG.decant_faixas || [];
+            var n = num(pai.preco), tb = CFG.decant_faixas || {};
+            if (Object.prototype.toString.call(tb) === '[object Array]') tb = { 'Árabe': tb };
+            var f = tb[pai.categoria] || [];
             for (var i = 0; i < f.length; i++) if (!isNaN(n) && n < f[i][0]) { novo = f[i][1] + ',00'; break; }
           }
           if (d.preco !== novo || d.disponivel !== disp) { d.preco = novo; d.disponivel = disp; mudou = true; }

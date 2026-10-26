@@ -236,16 +236,26 @@ def main():
             'img': img, 'img_ed': img_ed,
         })
 
-    # decants de 5 ml: criados sozinhos para todo perfume árabe com preço
-    # (faixas em config.json → decant_faixas: [preço do frasco abaixo de, preço do decant])
-    faixas = cfg.get('decant_faixas') or []
+    # decants de 5 ml: criados sozinhos para todo perfume com preço nas categorias de config.json → decant_faixas
+    # (cada categoria tem a sua lista de [preço do frasco abaixo de, preço do decant])
+    tabelas = cfg.get('decant_faixas') or {}
+    if isinstance(tabelas, list):  # formato antigo: só árabes
+        tabelas = {'Árabe': tabelas}
+    tabelas = {sem_acento(k).strip().lower(): v for k, v in tabelas.items()}
+    colecao = {'arabe': 'Árabes', 'designer': 'Importados', 'nicho': 'Nicho'}
+    # config.json → decant_somente: {"Nicho": ["MG085", ...]} = nessa coleção, só esses perfumes têm decant
+    somente = {sem_acento(k).strip().lower(): {str(i).strip().upper() for i in v} for k, v in (cfg.get('decant_somente') or {}).items() if isinstance(v, list)}
     vial = Image.open(RAIZ / 'assets' / 'decant-5ml.png').convert('RGBA')
     decants = []
     for p in produtos:
-        if sem_acento(p['categoria']).strip().lower() != 'arabe':
+        cat = sem_acento(p['categoria']).strip().lower()
+        if cat not in tabelas:
             continue
+        faixas = tabelas[cat]
         valor = numero(p['preco'])
         proprio = numero(p.get('preco_decant'))  # coluna opcional: preço próprio do decant
+        if cat in somente and p['id'] not in somente[cat] and proprio is None:
+            continue
         pd = proprio if proprio is not None else next((pr for lim, pr in faixas if valor is not None and valor < lim), None)
         if pd is None:
             continue
@@ -261,9 +271,11 @@ def main():
             except Exception as e:
                 avisos.append(f"decant {p['id']}: foto com problema ({e})")
         decants.append({**p, 'id': p['id'] + '-D', 'pai': p['id'], 'slug': p['slug'] + '-decant',
-                        'nome': p['nome'] + ' · Decant 5 ml', 'categoria': 'Decant', 'volume': '5 ml',
+                        'nome': p['nome'] + ' · Decant 5 ml', 'categoria': 'Decant', 'colecao': colecao.get(cat, p['categoria']), 'volume': '5 ml',
                         'preco': pd, 'disponivel': True if proprio is not None else p['disponivel'], 'destaque': False, 'img': img, 'img_ed': '',
                         'descricao_sensorial': 'Decant de 5 ml com o perfume original, para conhecer a fragrância antes do frasco completo. ' + p['descricao_sensorial']})
+    ordem = {'Árabes': 0, 'Importados': 1, 'Nicho': 2}
+    decants.sort(key=lambda d: ordem.get(d['colecao'], 9))
     produtos += decants
 
     if not produtos:
