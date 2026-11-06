@@ -22,7 +22,7 @@
     { rot: 'Seleção Maison Galbano', f: function (p) { return p.destaque; } }
   ];
   var marcaSel = '';  // marca escolhida nos quadrinhos de Marcas (filtra o acervo)
-  var st = { cat: null, dsub: '', desc: null, perfil: '', familia: '', ocasiao: '', busca: '' };
+  var st = { cat: null, dsub: '', desc: null, perfil: '', familia: '', ocasiao: '', busca: '', marca: '' };
   var ordem = 'rec';   // ordenação do acervo
   var ORDENS = [['rec', 'Recomendados'], ['menor', 'Menor preço'], ['maior', 'Maior preço'], ['az', 'Nome (A–Z)']];
 
@@ -317,6 +317,8 @@
         '<button type="button" class="limpar" id="limpar" hidden>Limpar filtros</button>' +
       '</div>' +
       '<div class="acervo-topo" id="resultado" style="scroll-margin-top:84px"><h2 class="h-display" id="tituloGrade" style="font-size:30px"></h2><span class="contagem" id="contagem"></span></div>' +
+      // marcas da coleção escolhida (Árabes, Importados, Nicho): o cliente escolhe a casa antes de ver os frascos
+      '<div class="marcas-cat" id="marcasCat" hidden></div>' +
       // divisão dos decants (Nicho · Árabes · Importados) aparece antes dos frascos
       '<div class="chips subdec" id="subdec" hidden>' + [['', 'Todos os decants'], ['Nicho', 'Decants Nicho'], ['Árabes', 'Decants Árabes'], ['Importados', 'Decants Importados']].map(function (d) {
         return '<button type="button" class="chip" data-dsub="' + d[0] + '" aria-pressed="false">' + d[1] + '</button>'; }).join('') + '</div>' +
@@ -401,6 +403,7 @@
       // decants só aparecem na aba Decants (ou na busca, quando o perfume é vendido só em decant)
       return (!p.pai || st.cat === 'Decants' || (b && !porId(p.pai))) &&
         (!marcaSel || p.marca === marcaSel) &&
+        (!st.marca || p.marca === st.marca) &&
         (!st.cat || p.categoria === (CAT_KEY[st.cat] || st.cat)) &&
         (st.cat !== 'Decants' || !st.dsub || p.colecao === st.dsub) &&
         (st.desc === null || DESCOBERTA[st.desc].f(p)) &&
@@ -420,7 +423,21 @@
       return (st.cat === 'Decants' ? (grp[x.colecao] || 0) - (grp[y.colecao] || 0) : 0) ||
         (x.disponivel ? 0 : 1) - (y.disponivel ? 0 : 1) || cmp(x, y) || A[1] - B[1];
     }).map(function (a) { return a[0]; });
-    var titulo = marcaSel || (termos.length ? 'Busca: “' + st.busca + '”' : null) || (st.desc !== null ? DESCOBERTA[st.desc].rot : (st.cat === 'Decants' && st.dsub ? 'Decants ' + st.dsub : (st.cat || 'Todas as fragrâncias')));
+    var titulo = marcaSel || (st.marca && st.cat ? st.cat + ' · ' + st.marca : '') || (termos.length ? 'Busca: “' + st.busca + '”' : null) || (st.desc !== null ? DESCOBERTA[st.desc].rot : (st.cat === 'Decants' && st.dsub ? 'Decants ' + st.dsub : (st.cat || 'Todas as fragrâncias')));
+    var mc = $('#marcasCat');
+    if (mc) {
+      var temMarcas = st.cat && st.cat !== 'Decants' && !termos.length && st.desc === null && !marcaSel;
+      mc.hidden = !temMarcas;
+      if (temMarcas) {
+        var cont = {};
+        PRODUTOS.forEach(function (p) { if (!p.pai && p.categoria === (CAT_KEY[st.cat] || st.cat)) cont[p.marca] = (cont[p.marca] || 0) + 1; });
+        var nomes = Object.keys(cont).sort(function (a, b) { return cont[b] - cont[a] || a.localeCompare(b, 'pt-BR'); });
+        var tot = nomes.reduce(function (s, m) { return s + cont[m]; }, 0);
+        mc.innerHTML = '<p class="eyebrow">Escolha a marca</p><div class="marcas-lista">' +
+          '<button type="button" class="marca-btn" data-mcat="" aria-pressed="' + !st.marca + '">Todas as marcas<span class="qtd">' + tot + '</span></button>' +
+          nomes.map(function (m) { return '<button type="button" class="marca-btn" data-mcat="' + esc(m) + '" aria-pressed="' + (st.marca === m) + '">' + esc(m) + '<span class="qtd">' + cont[m] + '</span></button>'; }).join('') + '</div>';
+      }
+    }
     var sd = $('#subdec');
     if (sd) { sd.hidden = st.cat !== 'Decants'; [].forEach.call(sd.querySelectorAll('[data-dsub]'), function (el) { el.setAttribute('aria-pressed', el.getAttribute('data-dsub') === (st.dsub || '')); }); }
     $('#tituloGrade').textContent = titulo;
@@ -434,7 +451,7 @@
     }).join('') : '<p class="vazio">' + (termos.length ? 'Nenhuma fragrância encontrada. Tente outro nome, marca ou nota.' : 'Nenhuma fragrância com essa combinação. Novas chegam em breve.') + '</p>';
     [].forEach.call(document.querySelectorAll('[data-cat]'), function (el) { el.setAttribute('aria-pressed', (el.getAttribute('data-cat') || null) === st.cat); });
     [].forEach.call(document.querySelectorAll('[data-desc]'), function (el) { el.setAttribute('aria-pressed', Number(el.getAttribute('data-desc')) === st.desc); });
-    $('#limpar').hidden = !(marcaSel || st.cat || st.desc !== null || st.perfil || st.familia || st.ocasiao || st.busca);
+    $('#limpar').hidden = !(marcaSel || st.marca || st.cat || st.desc !== null || st.perfil || st.familia || st.ocasiao || st.busca);
   }
 
   function iniciarCtaFixa() {
@@ -463,19 +480,24 @@
       var alvo = document.getElementById(ancora.getAttribute('href').slice(1));
       if (alvo) { e.preventDefault(); setTimeout(function () { alvo.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 0); }
     }
-    if (t.closest('[data-cat],[data-cat-link],[data-dsub],[data-busca],[data-desc]') || t.id === 'limpar') marcaSel = '';
+    if (t.closest('[data-cat],[data-cat-link],[data-dsub],[data-busca],[data-desc]') || t.id === 'limpar') { marcaSel = ''; st.marca = ''; }
+    if ((el = t.closest('[data-mcat]'))) {
+      st.marca = el.getAttribute('data-mcat'); aplicar();
+      var r = $('#resultado'); if (r && r.getBoundingClientRect().top < 0) r.scrollIntoView({ block: 'start' });
+      return;
+    }
     if ((el = t.closest('[data-marca]'))) {
-      st = { cat: null, dsub: '', desc: null, perfil: '', familia: '', ocasiao: '', busca: '' }; marcaSel = el.getAttribute('data-marca');
+      st = { cat: null, dsub: '', desc: null, perfil: '', familia: '', ocasiao: '', busca: '', marca: '' }; marcaSel = el.getAttribute('data-marca');
       var bm = $('#busca'); if (bm) bm.value = ''; [].forEach.call(document.querySelectorAll('[data-filtro]'), function (s) { s.value = ''; }); aplicar(); return;
     }
     if ((el = t.closest('[data-dsub]')) && !el.hasAttribute('data-cat-link')) { st.cat = 'Decants'; st.dsub = el.getAttribute('data-dsub'); st.desc = null; aplicar(); return; }
     if ((el = t.closest('[data-cat]'))) { st.cat = el.getAttribute('data-cat') || null; st.dsub = ''; st.desc = null; aplicar(); if (el.scrollIntoView) el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); return; }
     if ((el = t.closest('[data-cat-link]'))) { st.cat = el.getAttribute('data-cat-link'); st.dsub = el.getAttribute('data-dsub') || ''; st.desc = null; aplicar(); }
-    if ((el = t.closest('[data-busca]'))) { st = { cat: null, dsub: '', desc: null, perfil: '', familia: '', ocasiao: '', busca: el.getAttribute('data-busca').toLowerCase() }; var bi = $('#busca'); if (bi) bi.value = el.getAttribute('data-busca'); aplicar(); }
+    if ((el = t.closest('[data-busca]'))) { st = { cat: null, dsub: '', desc: null, perfil: '', familia: '', ocasiao: '', busca: el.getAttribute('data-busca').toLowerCase(), marca: '' }; var bi = $('#busca'); if (bi) bi.value = el.getAttribute('data-busca'); aplicar(); }
     if ((el = t.closest('[data-desc]'))) { var i = Number(el.getAttribute('data-desc')); st.desc = st.desc === i ? null : i; st.cat = null; aplicar(); return; }
     if ((el = t.closest('[data-lead]'))) track('Lead', porId(el.getAttribute('data-lead')));
     if (t.id === 'limpar') {
-      st = { cat: null, dsub: '', desc: null, perfil: '', familia: '', ocasiao: '', busca: '' };
+      st = { cat: null, dsub: '', desc: null, perfil: '', familia: '', ocasiao: '', busca: '', marca: '' };
       $('#busca').value = ''; [].forEach.call(document.querySelectorAll('[data-filtro]'), function (s) { s.value = ''; }); aplicar();
     }
     if (t.id === 'copiar') {
