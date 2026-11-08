@@ -19,6 +19,7 @@
     { rot: 'Masculinos', f: function (p) { return p.perfil === 'Masculino'; } },
     { rot: 'Femininos', f: function (p) { return p.perfil === 'Feminino'; } },
     { rot: 'Compartilháveis', f: function (p) { return p.perfil === 'Compartilhável'; } },
+    { rot: 'Até R$ 400', f: function (p) { var n = num(p.preco); return p.disponivel && !isNaN(n) && n <= 400; } },
     { rot: 'Seleção Maison Galbano', f: function (p) { return p.destaque; } }
   ];
   var marcaSel = '';  // marca escolhida nos quadrinhos de Marcas (filtra o acervo)
@@ -256,6 +257,23 @@
       }).join('');
   }
 
+  // entrada: 4 atalhos (Árabes · Importados · Nicho · Decants) que filtram a lista logo abaixo
+  function atalhos() {
+    var cs = COLECOES.concat([{ nome: 'Decants', frase: 'Conheça antes de comprar' }]).map(function (c) {
+      var ps = c.nome === 'Decants' ? PRODUTOS.filter(function (p) { return p.pai; }) : daColecao(c.nome);
+      return { nome: c.nome, frase: c.frase, produtos: ps };
+    }).filter(function (c) { return c.produtos.length; });
+    if (!cs.length) return '';
+    return '<section id="colecoes" class="atalhos"><div class="wrap">' +
+      '<p class="eyebrow">Por onde começar</p>' +
+      '<div class="grade-atalhos">' + cs.map(function (c) {
+        var capa = c.produtos.filter(function (p) { return p.img && p.id === CAPA_COL[c.nome]; })[0] || c.produtos.filter(function (p) { return p.img; })[0];
+        return '<a href="#resultado" class="atalho" data-cat-link="' + c.nome + '">' +
+          '<span class="foto">' + (capa ? '<img src="' + capa.img + '" alt="" decoding="async">' : '') + '</span>' +
+          '<span class="txt"><span class="nome-col">' + c.nome + '</span><small>' + c.produtos.length + (c.nome === 'Decants' ? ' decants' : ' perfumes') + '</small></span></a>';
+      }).join('') + '</div></div></section>';
+  }
+
   // pastas de decants: Nicho · Árabes · Importados (pasta vazia aparece como "em breve")
   function pastasDecant() {
     return '<div class="pastas-dec grade-col">' + ['Nicho', 'Árabes', 'Importados'].map(function (c) {
@@ -310,14 +328,8 @@
     var familias = uniq(PRODUTOS.map(function (p) { return p.familia_olfativa; }));
     var ocasioes = uniq([].concat.apply([], PRODUTOS.map(function (p) { return lista(p.ocasiao).map(cap); })));
     var ms = marcas();
-    return vitrine(dest, ms) + secaoColecoes() +
-    '<section class="apres-sec"><div class="wrap"><div class="apres measure">' +
-      '<p class="eyebrow">A Maison</p>' +
-      '<p class="lede">Perfumaria árabe, importada e de nicho, com decants para conhecer cada fragrância antes do frasco. Uma seleção feita em São Paulo, com envio para todo o Brasil.</p>' +
-      '<figure class="filosofia"><blockquote>“Na Maison Galbano, perfume original não é uma escolha. É uma obrigação e uma forma de respeito aos nossos clientes.”</blockquote><figcaption>Edson e Isabel, fundadores</figcaption></figure>' +
-    '</div></div></section>' +
-
-    '<section id="acervo" style="padding-top:0"><div class="wrap"><p class="eyebrow" style="margin-bottom:6px">O acervo</p></div>' +
+    return vitrine(dest, ms) + atalhos() +
+    '<section id="acervo">' +
       // barra que acompanha a rolagem: abas das coleções + busca + ordenação
       '<div class="filtro-fixo"><div class="wrap">' +
         '<div class="abas" role="group" aria-label="Coleções"><button type="button" data-cat="" aria-pressed="true">Todas</button>' + CATEGORIAS.map(function (c) {
@@ -330,7 +342,8 @@
       '<div class="wrap">' +
       '<div class="ferramentas">' +
         '<div class="chips">' + DESCOBERTA.map(function (d, i) { return '<button type="button" class="chip" data-desc="' + i + '" aria-pressed="false">' + d.rot + '</button>'; }).join('') + '</div>' +
-        '<div class="refinar">' + opcoes('perfil', 'Perfil', perfis, st.perfil) + opcoes('familia', 'Família olfativa', familias, st.familia) + opcoes('ocasiao', 'Ocasião', ocasioes, st.ocasiao) + '</div>' +
+        '<details class="mais-filtros"><summary>Mais filtros: perfil, família olfativa e ocasião</summary>' +
+        '<div class="refinar">' + opcoes('perfil', 'Perfil', perfis, st.perfil) + opcoes('familia', 'Família olfativa', familias, st.familia) + opcoes('ocasiao', 'Ocasião', ocasioes, st.ocasiao) + '</div></details>' +
         '<button type="button" class="limpar" id="limpar" hidden>Limpar filtros</button>' +
       '</div>' +
       '<div class="acervo-topo" id="resultado" style="scroll-margin-top:84px"><h2 class="h-display" id="tituloGrade" style="font-size:30px"></h2><span class="contagem" id="contagem"></span></div>' +
@@ -350,6 +363,12 @@
         '<div class="pilar"><h3>Atendimento personalizado</h3><p>Ajudamos você a encontrar a sua assinatura, sem pressa.</p></div>' +
         '<div class="pilar"><h3>Envio para todo o Brasil</h3><p>Do nosso acervo em São Paulo até a sua porta.</p></div>' +
       '</div></div></section>' +
+
+    '<section class="apres-sec"><div class="wrap"><div class="apres measure">' +
+      '<p class="eyebrow">A Maison</p>' +
+      '<p class="lede">Perfumaria árabe, importada e de nicho, com decants para conhecer cada fragrância antes do frasco. Uma seleção feita em São Paulo, com envio para todo o Brasil.</p>' +
+      '<figure class="filosofia"><blockquote>“Na Maison Galbano, perfume original não é uma escolha. É uma obrigação e uma forma de respeito aos nossos clientes.”</blockquote><figcaption>Edson e Isabel, fundadores</figcaption></figure>' +
+    '</div></div></section>' +
 
     '<section class="decants" id="decants" style="background:var(--bege)"><div class="wrap">' +
       '<p class="ml">5<small>ml</small></p>' +
