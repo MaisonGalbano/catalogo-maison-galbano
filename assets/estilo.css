@@ -604,3 +604,31 @@ section[id] { scroll-margin-top: 76px; }
 .s-oficial picture { display: block; }
 .s-oficial picture, .s-oficial img, .tem-arte .s-ban-arte, .tem-arte .s-ban-arte img { height: var(--ban-h); }
 @media (min-width: 760px) { .tem-arte { display: grid; } }
+
+/* ── carrossel no celular: um pedaço do próximo banner aparece (mostra que dá para arrastar) ── */
+@media (max-width: 759px) {
+  :root { --ban-w: 88vw; --ban-h: 88vw; }
+  .trilho { gap: 8px; padding-inline: 16px; scroll-padding-inline: 16px; overscroll-behavior-x: contain; }
+  .slide { flex: 0 0 var(--ban-w); border-radius: 6px; scroll-snap-stop: always; }
+  .s-nicho-in, .s-marca-grid, .capa-corpo { padding-inline: 16px; padding-block: 14px; gap: 12px; }
+  .s-nicho-txt { gap: 4px; }
+  .s-nicho-txt .eyebrow { font-size: 9px; }
+  .s-nicho-txt .h-display { font-size: 24px; line-height: 1.1; }
+  .s-nicho-txt .link-fino { font-size: 10px; }
+  .s-ban-links { gap: 6px 16px; }
+  .s-nicho-item .eyebrow { margin-top: 4px; }
+  .s-nicho-nome { font-size: 13px; }
+  .s-ban-preco { font-size: 10.5px; }
+  .s-ban-dest .s-marca-txt .h-display { font-size: 21px; }
+  .s-ban-dest .s-marca-prod { font-size: 13px; }
+  .s-ban-dest .s-marca-txt .eyebrow { font-size: 9px; }
+  .s-ban-valor .preco-pix { font-size: 19px; }
+  .s-ban-valor .preco-parc { font-size: 10.5px; }
+  .s-ban-acoes .btn { padding-block: 11px; }
+  .s-ban-dest .s-marca-img img { max-height: calc(var(--ban-h) - 40px); }
+}
+/* lista do acervo: 24 por vez */
+.ver-mais { grid-column: 1 / -1; display: flex; justify-content: center; padding-block: 12px 8px; }
+.ver-mais .btn { width: auto; padding-inline: 32px; }
+.ver-mais .btn { background: transparent; color: var(--verde); border: 1px solid var(--verde); }
+.ver-mais .btn:hover { background: var(--verde); color: var(--off); }

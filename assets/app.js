@@ -24,6 +24,7 @@
   var marcaSel = '';  // marca escolhida nos quadrinhos de Marcas (filtra o acervo)
   var st = { cat: null, dsub: '', desc: null, perfil: '', familia: '', ocasiao: '', busca: '', marca: '' };
   var ordem = 'rec';   // ordenação do acervo
+  var POR_VEZ = 24, mostrar = POR_VEZ;   // a lista mostra 24 perfumes por vez (botão "Ver mais")
   var ORDENS = [['rec', 'Recomendados'], ['menor', 'Menor preço'], ['maior', 'Maior preço'], ['az', 'Nome (A–Z)']];
 
   // ── utilidades ──
@@ -173,7 +174,7 @@
     var b = CFG.banner_arabes || {}, ps = produtosDe(b.ids);
     if (!ps.length) return '';
     // arte pronta para o celular (config.json → banner_arabes.imagem_celular); no computador fica o banner montado
-    var arte = b.imagem_celular ? '<a class="s-ban-arte" href="#resultado" data-cat-link="Árabes"><img src="' + esc(b.imagem_celular) + '" alt="Árabes: os favoritos" loading="lazy"></a>' : '';
+    var arte = b.imagem_celular ? '<a class="s-ban-arte" href="#resultado" data-cat-link="Árabes"><img src="' + esc(b.imagem_celular) + '" alt="Árabes: os favoritos" decoding="async"></a>' : '';
     return '<div class="slide s-nicho s-ban-claro' + (arte ? ' tem-arte' : '') + '">' + arte + '<div class="wrap s-nicho-in">' +
       '<div class="s-nicho-txt"><p class="eyebrow">' + esc(b.chamada || 'Árabes · Os favoritos') + '</p>' +
         '<h2 class="h-display">' + esc(b.titulo || 'A intensidade e o luxo do').replace(/$/, '') + ' <em>' + esc(b.destaque || 'Oriente.') + '</em></h2>' +
@@ -189,7 +190,7 @@
     if (!ps.length || !ds.length) return '';
     var min = Math.min.apply(null, ds.map(function (p) { return num(p.preco); }));
     // arte pronta para o celular (config.json → banner_decants.imagem_celular); no computador fica o banner montado
-    var arte = b.imagem_celular ? '<a class="s-ban-arte" href="#resultado" data-cat-link="Decants"><img src="' + esc(b.imagem_celular) + '" alt="Decants de 5 ml: nicho e árabes" loading="lazy"></a>' : '';
+    var arte = b.imagem_celular ? '<a class="s-ban-arte" href="#resultado" data-cat-link="Decants"><img src="' + esc(b.imagem_celular) + '" alt="Decants de 5 ml: nicho e árabes" decoding="async"></a>' : '';
     return '<div class="slide s-nicho s-ban-off' + (arte ? ' tem-arte' : '') + '">' + arte + '<div class="wrap s-nicho-in">' +
       '<div class="s-nicho-txt"><p class="eyebrow">Decants de 5 ml · a partir de ' + brl(min) + '</p>' +
         '<h2 class="h-display">' + esc(b.titulo || 'Conheça antes de') + ' <em>' + esc(b.destaque || 'escolher.') + '</em></h2>' +
@@ -214,11 +215,11 @@
   }
 
   function vitrine(dest, ms) {
-    var slides = [slideInstitucional(dest)];
-    var nicho = slideNicho(); if (nicho) slides.unshift(nicho);  // banner dos nichos abre a vitrine
-    ms.forEach(function (m) { if (m.banner) slides.push(slideMarca(m)); });   // banners das marcas (pasta fotos/marcas) logo depois da capa
-    [slideArabes(), slideDecants(), slideDestaque()].forEach(function (s) { if (s) slides.push(s); });
-    slides = slides.slice(0, 7);
+    // ordem: o que vende primeiro (destaque com preço, decants, árabes), depois nicho e banners das marcas
+    var slides = [slideDestaque(), slideDecants(), slideArabes(), slideNicho()].filter(Boolean);
+    ms.forEach(function (m) { if (m.banner) slides.push(slideMarca(m)); });   // banners das marcas (pasta fotos/marcas)
+    if (!slides.length) slides.push(slideInstitucional(dest));
+    slides = slides.slice(0, 6);
     return '<header class="topo"><div class="wrap topo-in">' +
         '<a href="./" class="topo-logo"><img src="assets/logo-maison-galbano.png" alt="Maison Galbano" width="52" height="52"></a>' +
         '<nav class="topo-nav"><a href="#colecoes">Coleções</a><a href="#acervo">Acervo</a><a href="#resultado" data-cat-link="Decants">Decants</a></nav>' +
@@ -271,14 +272,30 @@
   function iniciarVitrine() {
     var tr = $('#trilho'), pts = [].slice.call(document.querySelectorAll('#pontos button'));
     if (!tr || pts.length < 2) return;
-    var timer = null;
-    function atual() { return Math.round(tr.scrollLeft / tr.clientWidth); }
-    function ir(i) { tr.scrollTo({ left: tr.clientWidth * i, behavior: 'smooth' }); }
-    function parar() { clearInterval(timer); timer = null; }
-    tr.addEventListener('scroll', function () { var i = atual(); pts.forEach(function (b, j) { if (i === j) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); }); }, { passive: true });
+    var sl = [].slice.call(tr.children), timer = null, mexeu = false;
+    // arte do celular muito comprida (formato Stories) fica ilegível no banner: usa o banner montado até chegar a arte quadrada
+    [].forEach.call(tr.querySelectorAll('.s-ban-arte img'), function (im) {
+      function ver() { if (im.naturalWidth && im.naturalHeight / im.naturalWidth > 1.3) { var s = im.closest('.slide'); if (s) s.classList.remove('tem-arte'); } }
+      if (im.complete) ver(); else im.addEventListener('load', ver);
+    });
+    function atual() {
+      var x = tr.scrollLeft, best = 0;
+      sl.forEach(function (s, i) { if (Math.abs(s.offsetLeft - sl[0].offsetLeft - x) < Math.abs(sl[best].offsetLeft - sl[0].offsetLeft - x)) best = i; });
+      return best;
+    }
+    function ir(i) { tr.scrollTo({ left: sl[i].offsetLeft - sl[0].offsetLeft, behavior: 'smooth' }); }
+    function parar() { mexeu = true; clearInterval(timer); timer = null; }
+    var raf = 0;
+    tr.addEventListener('scroll', function () {
+      if (raf) return;
+      raf = requestAnimationFrame(function () { raf = 0; var i = atual(); pts.forEach(function (b, j) { if (i === j) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); }); });
+    }, { passive: true });
     pts.forEach(function (b) { b.addEventListener('click', function () { parar(); ir(Number(b.getAttribute('data-slide'))); }); });
     ['pointerdown', 'touchstart', 'wheel'].forEach(function (ev) { tr.addEventListener(ev, parar, { passive: true }); });
-    if (!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) timer = setInterval(function () { ir((atual() + 1) % pts.length); }, 6500);
+    // passa sozinho só depois que a página assentou, e para de vez quando a pessoa mexe
+    if (!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) setTimeout(function () {
+      if (!mexeu) timer = setInterval(function () { if (document.hidden || tr.getBoundingClientRect().bottom < 0) return; ir((atual() + 1) % sl.length); }, 6000);
+    }, 4000);
   }
 
   function opcoes(nome, rot, valores, atual) {
@@ -395,8 +412,9 @@
   }
 
   // ── filtros ──
-  function aplicar() {
+  function aplicar(manter) {
     var g = $('#grade'); if (!g) return;
+    if (!manter) mostrar = POR_VEZ;
     var b = st.busca;
     var termos = norm(b).split(/\s+/).filter(Boolean);
     var res = PRODUTOS.filter(function (p) {
@@ -443,12 +461,13 @@
     $('#tituloGrade').textContent = titulo;
     $('#contagem').textContent = res.length + (res.length === 1 ? ' fragrância' : ' fragrâncias');
     var ult = null;
-    g.innerHTML = res.length ? res.map(function (p) {
+    var resto = res.length - mostrar;
+    g.innerHTML = res.length ? res.slice(0, mostrar).map(function (p) {
       // em "Todos os decants", cada divisão ganha o seu título antes dos frascos
       var cab = (st.cat === 'Decants' && !st.dsub && p.colecao && p.colecao !== ult) ? '<h3 class="grupo-dec">Decants ' + p.colecao + '</h3>' : '';
       if (p.colecao) ult = p.colecao;
       return cab + card(p);
-    }).join('') : '<p class="vazio">' + (termos.length ? 'Nenhuma fragrância encontrada. Tente outro nome, marca ou nota.' : 'Nenhuma fragrância com essa combinação. Novas chegam em breve.') + '</p>';
+    }).join('') + (resto > 0 ? '<div class="ver-mais"><button type="button" class="btn claro" id="verMais">Ver mais ' + Math.min(resto, POR_VEZ) + ' de ' + resto + '</button></div>' : '') : '<p class="vazio">' + (termos.length ? 'Nenhuma fragrância encontrada. Tente outro nome, marca ou nota.' : 'Nenhuma fragrância com essa combinação. Novas chegam em breve.') + '</p>';
     [].forEach.call(document.querySelectorAll('[data-cat]'), function (el) { el.setAttribute('aria-pressed', (el.getAttribute('data-cat') || null) === st.cat); });
     [].forEach.call(document.querySelectorAll('[data-desc]'), function (el) { el.setAttribute('aria-pressed', Number(el.getAttribute('data-desc')) === st.desc); });
     $('#limpar').hidden = !(marcaSel || st.marca || st.cat || st.desc !== null || st.perfil || st.familia || st.ocasiao || st.busca);
@@ -496,6 +515,7 @@
     if ((el = t.closest('[data-busca]'))) { st = { cat: null, dsub: '', desc: null, perfil: '', familia: '', ocasiao: '', busca: el.getAttribute('data-busca').toLowerCase(), marca: '' }; var bi = $('#busca'); if (bi) bi.value = el.getAttribute('data-busca'); aplicar(); }
     if ((el = t.closest('[data-desc]'))) { var i = Number(el.getAttribute('data-desc')); st.desc = st.desc === i ? null : i; st.cat = null; aplicar(); return; }
     if ((el = t.closest('[data-lead]'))) track('Lead', porId(el.getAttribute('data-lead')));
+    if (t.id === 'verMais') { mostrar += POR_VEZ; aplicar(true); return; }
     if (t.id === 'limpar') {
       st = { cat: null, dsub: '', desc: null, perfil: '', familia: '', ocasiao: '', busca: '', marca: '' };
       $('#busca').value = ''; [].forEach.call(document.querySelectorAll('[data-filtro]'), function (s) { s.value = ''; }); aplicar();
@@ -558,8 +578,9 @@
           if (d.preco !== novo || d.disponivel !== disp) { d.preco = novo; d.disponivel = disp; mudou = true; }
         });
         if (mudou) {
-          var y = window.scrollY, busca = st.busca;
-          render(); if ($('#busca')) $('#busca').value = busca; window.scrollTo(0, y);
+          // na home só atualiza a lista (refazer a página inteira travava o carrossel no começo)
+          if ($('#grade')) aplicar(true);
+          else { var y = window.scrollY; render(); window.scrollTo(0, y); }
         }
       })
       .catch(function () { /* sem problema: fica com os dados da última publicação */ })
