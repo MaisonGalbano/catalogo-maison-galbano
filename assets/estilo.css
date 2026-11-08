@@ -554,3 +554,53 @@ section[id] { scroll-margin-top: 76px; }
   .s-ban-off.tem-arte { border-bottom: 0; background: #EDE4D6; }
 }
 @media (max-width: 759px) { .s-ban-claro.tem-arte { background: #EDE3D3; } }
+
+/* ── vitrine compacta: banner menor para o cliente já ver o catálogo ──
+   artes: celular 1080 x 1080 px (quadrada) · computador 1920 x 640 px */
+:root { --ban-h: min(104vw, 440px); }
+@media (min-width: 760px) { :root { --ban-h: clamp(360px, 52vh, 500px); } }
+.trilho { align-items: stretch; }
+.slide { height: var(--ban-h); overflow: hidden; }
+.slide > .wrap { height: 100%; }
+.pontos { padding-block: 10px 12px; }
+/* artes prontas e banners oficiais: cabem inteiros na altura nova */
+.s-oficial picture, .s-oficial img, .tem-arte .s-ban-arte, .tem-arte .s-ban-arte img { height: 100%; }
+.s-oficial img, .tem-arte .s-ban-arte img { width: 100%; object-fit: contain; }
+/* banners montados: mais enxutos */
+.s-nicho-in, .s-marca-grid, .capa-corpo { padding-block: 20px; gap: 16px; align-content: center; }
+.s-nicho-txt { gap: 8px; }
+.s-nicho-txt .h-display { font-size: clamp(26px, 7.4vw, 44px); }
+.s-nicho-sub { display: none; }
+.s-nicho-foto { aspect-ratio: 1 / 1; }
+@media (max-width: 759px) {
+  .s-nicho-grade { flex-wrap: nowrap; gap: 8px; }
+  .s-nicho-item { flex: 1 1 0; }
+  .s-nicho-item:nth-child(n+4) { display: none; }
+  .s-nicho-nome { font-size: 15px; }
+  /* capa: só o texto e os botões */
+  .s-inst .arco-wrap { display: none; }
+  .capa .tese { font-size: clamp(34px, 10vw, 44px); }
+  .capa .cta-linha { flex-direction: column; }
+  /* destaque da semana: foto e texto lado a lado */
+  .s-ban-dest .s-marca-grid { grid-template-columns: .9fr 1.1fr; gap: 14px; }
+  .s-ban-dest .s-marca-img img { max-height: calc(var(--ban-h) - 60px); }
+  .s-ban-dest .s-marca-txt { gap: 8px; }
+  .s-ban-dest .s-marca-txt .h-display { font-size: 24px; }
+  .s-ban-dest .s-marca-prod { font-size: 15px; }
+  .s-ban-valor .preco-pix { font-size: 22px; }
+  .s-ban-acoes { flex-direction: column; align-items: stretch; gap: 10px; }
+  .s-ban-acoes .btn { padding-inline: 12px; text-align: center; }
+}
+@media (min-width: 760px) {
+  .s-nicho-in { grid-template-columns: .7fr 1.3fr; }
+  .s-nicho-foto { max-height: calc(var(--ban-h) - 130px); }
+  .s-nicho-grade { align-items: start; }
+  .s-ban-dest .s-marca-img img, .s-marca-img img { max-height: calc(var(--ban-h) - 60px); object-fit: contain; }
+  .s-ban-dest .s-marca-txt .h-display { font-size: clamp(32px, 4vw, 52px); }
+  .arco { max-height: calc(var(--ban-h) - 110px); }
+  .capa .tese { font-size: clamp(40px, 4.4vw, 60px); }
+}
+.s-oficial, .tem-arte { display: block; }
+.s-oficial picture { display: block; }
+.s-oficial picture, .s-oficial img, .tem-arte .s-ban-arte, .tem-arte .s-ban-arte img { height: var(--ban-h); }
+@media (min-width: 760px) { .tem-arte { display: grid; } }
