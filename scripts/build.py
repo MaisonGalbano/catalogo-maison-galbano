@@ -21,7 +21,7 @@ SELO = (9, 30, 15)
 
 COLUNAS = ['id', 'marca', 'nome', 'concentracao', 'volume', 'categoria', 'perfil', 'familia_olfativa',
            'notas_topo', 'notas_coracao', 'notas_fundo', 'ocasiao', 'descricao_sensorial', 'preco',
-           'disponivel', 'destaque', 'imagem', 'preco_decant', 'preco_decant_de']
+           'disponivel', 'destaque', 'imagem', 'preco_decant', 'preco_decant_de', 'preco_de']
 
 
 def sem_acento(s):
@@ -255,6 +255,9 @@ def main():
             continue
         faixas = tabelas[cat]
         valor = numero(p['preco'])
+        de = numero(p.get('preco_de'))  # em promoção, o decant segue o preço normal do frasco
+        if de is not None and (valor is None or de > valor):
+            valor = de
         proprio = numero(p.get('preco_decant'))  # coluna opcional: preço próprio do decant
         if cat in somente and p['id'] not in somente[cat] and proprio is None:
             continue
@@ -323,7 +326,7 @@ def main():
 
     versao = hashlib.md5(((RAIZ / 'assets' / 'app.js').read_bytes() + (RAIZ / 'assets' / 'estilo.css').read_bytes())).hexdigest()[:8]
     modelo = (RAIZ / 'src' / 'pagina.html').read_text(encoding='utf-8')
-    config_pub = {'whatsapp': re.sub(r'\D', '', str(cfg.get('whatsapp', ''))), 'meta_pixel_id': str(cfg.get('meta_pixel_id', '')).strip(), 'csv_url': cfg.get('csv_url', ''), 'cartao_acrescimo': cfg.get('cartao_acrescimo', 0), 'parcelas': cfg.get('parcelas', 1), 'decant_faixas': cfg.get('decant_faixas', []), 'banner_nicho': cfg.get('banner_nicho', {}), 'banner_arabes': cfg.get('banner_arabes', {}), 'banner_decants': cfg.get('banner_decants', {}), 'banner_destaque': cfg.get('banner_destaque', {})}
+    config_pub = {'whatsapp': re.sub(r'\D', '', str(cfg.get('whatsapp', ''))), 'meta_pixel_id': str(cfg.get('meta_pixel_id', '')).strip(), 'csv_url': cfg.get('csv_url', ''), 'cartao_acrescimo': cfg.get('cartao_acrescimo', 0), 'parcelas': cfg.get('parcelas', 1), 'decant_faixas': cfg.get('decant_faixas', []), 'banner_nicho': cfg.get('banner_nicho', {}), 'banner_arabes': cfg.get('banner_arabes', {}), 'banner_decants': cfg.get('banner_decants', {}), 'banner_destaque': cfg.get('banner_destaque', {}), 'banner_black': cfg.get('banner_black', {})}
 
     def js(o):
         return json.dumps(o, ensure_ascii=False).replace('</', '<\\/')
