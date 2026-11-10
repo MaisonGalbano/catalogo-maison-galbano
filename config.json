@@ -122,5 +122,19 @@
     "chamada": "Destaque da semana",
     "id": "MG134",
     "texto": "Um dos árabes mais incríveis de todos os tempos."
+  },
+  "banner_black": {
+    "inicio": "2026-11-10",
+    "fim": "2026-11-23",
+    "chamada": "Black Friday Maison Galbano",
+    "titulo": "Black Friday:",
+    "ids": [
+      "MG156",
+      "MG157",
+      "MG004",
+      "MG129",
+      "MG144",
+      "MG113"
+    ]
   }
 }
