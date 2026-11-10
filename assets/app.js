@@ -22,6 +22,11 @@
     { rot: 'Até R$ 400', f: function (p) { var n = num(p.preco); return p.disponivel && !isNaN(n) && n <= 400; } },
     { rot: 'Seleção Maison Galbano', f: function (p) { return p.destaque; } }
   ];
+  // ── Black Friday (config.json → banner_black: inicio, fim, ids) ──
+  function hojeSP() { try { return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date()); } catch (e) { return new Date().toISOString().slice(0, 10); } }
+  function emBlack() { var b = CFG.banner_black || {}; var h = hojeSP(); return !!(b.inicio && b.fim && h >= b.inicio && h <= b.fim); }
+  function promo(p) { return !p.pai && p.disponivel && num(p.preco_de) > num(p.preco); }
+  if (emBlack()) DESCOBERTA.unshift({ rot: 'Black Friday', f: promo });
   var marcaSel = '';  // marca escolhida nos quadrinhos de Marcas (filtra o acervo)
   var st = { cat: null, dsub: '', desc: null, perfil: '', familia: '', ocasiao: '', busca: '', marca: '' };
   var ordem = 'rec';   // ordenação do acervo
@@ -98,7 +103,8 @@
   // ── componentes ──
   function card(p) {
     return '<a class="card' + (p.disponivel ? '' : ' sem-estoque') + '" href="p/' + p.slug + '/">' +
-      '<div class="foto">' + (p.img ? '<img src="' + p.img + '" alt="' + esc(nomeTodo(p)) + '" loading="lazy" decoding="async">' : '<span class="sem-foto">Foto em breve</span>') + '</div>' +
+      '<div class="foto">' + (p.img ? '<img src="' + p.img + '" alt="' + esc(nomeTodo(p)) + '" loading="lazy" decoding="async">' : '<span class="sem-foto">Foto em breve</span>') +
+        (emBlack() && promo(p) ? '<span class="selo-black">Black Friday</span>' : '') + '</div>' +
       '<div class="info"><p class="eyebrow">' + esc(p.marca) + '</p><h3 class="nome">' + esc(p.nome) + '</h3>' +
       '<span class="preco">' + valor(p) + (p.disponivel ? '' : '<span class="selo-esg">Esgotado no momento</span>') + '</span></div></a>';
   }
@@ -201,6 +207,25 @@
       '<div class="s-nicho-grade">' + ps.slice(0, 4).map(function (p) { return itemBanner(p, true); }).join('') + '</div>' +
       '</div></div>';
   }
+  function slideBlack() {
+    var b = CFG.banner_black || {};
+    var ps = produtosDe(b.ids).filter(promo);
+    var todos = PRODUTOS.filter(promo);
+    if (!ps.length) return '';
+    var max = Math.max.apply(null, todos.map(function (p) { return Math.floor((1 - num(p.preco) / num(p.preco_de)) * 100); }));
+    var fim = String(b.fim || '').split('-');
+    return '<div class="slide s-nicho s-black"><div class="wrap s-nicho-in">' +
+      '<div class="s-nicho-txt"><p class="eyebrow">' + esc(b.chamada || 'Black Friday') + (fim.length === 3 ? ' · até ' + fim[2] + '/' + fim[1] : '') + '</p>' +
+        '<h2 class="h-display">' + esc(b.titulo || 'Black Friday') + ' <em>até ' + max + '% off.</em></h2>' +
+        '<p class="s-nicho-sub">' + esc(b.texto || (todos.length + ' perfumes com preço especial no Pix.')) + '</p>' +
+        '<a class="link-fino" href="#resultado" data-desc="0">Ver as ' + todos.length + ' ofertas</a></div>' +
+      '<div class="s-nicho-grade">' + ps.slice(0, 6).map(function (p) {
+        return '<a class="s-nicho-item" href="p/' + p.slug + '/"><div class="s-nicho-foto"><img src="' + p.img + '" alt="' + esc(nomeTodo(p)) + '" decoding="async"></div>' +
+          '<span class="eyebrow">' + esc(p.marca) + '</span><span class="s-nicho-nome">' + esc(p.nome) + '</span>' +
+          '<span class="s-black-preco"><s>' + brl(num(p.preco_de)) + '</s> ' + brl(num(p.preco)) + '</span></a>';
+      }).join('') + '</div>' +
+      '</div></div>';
+  }
   function slideDestaque() {
     var b = CFG.banner_destaque || {}, p = produtosDe([b.id])[0];
     if (!p) return '';
@@ -217,7 +242,7 @@
 
   function vitrine(dest, ms) {
     // ordem: o que vende primeiro (destaque com preço, decants, árabes), depois nicho e banners das marcas
-    var slides = [slideDestaque(), slideDecants(), slideArabes(), slideNicho()].filter(Boolean);
+    var slides = [emBlack() ? slideBlack() : '', slideDestaque(), slideDecants(), slideArabes(), slideNicho()].filter(Boolean);
     ms.forEach(function (m) { if (m.banner) slides.push(slideMarca(m)); });   // banners das marcas (pasta fotos/marcas)
     if (!slides.length) slides.push(slideInstitucional(dest));
     slides = slides.slice(0, 6);
@@ -579,7 +604,8 @@
           vivo[(row.id || '').trim().toUpperCase()] = row;
           var p = porId((row.id || '').trim().toUpperCase()); if (!p) return;
           var disp = !/^n/i.test(row.disponivel || 'sim');
-          if (p.preco !== row.preco || p.disponivel !== disp) { p.preco = row.preco; p.disponivel = disp; mudou = true; }
+          var de = row.preco_de || '';
+          if (p.preco !== row.preco || p.disponivel !== disp || (p.preco_de || '') !== de) { p.preco = row.preco; p.disponivel = disp; p.preco_de = de; mudou = true; }
         });
         // decants acompanham o preço e a disponibilidade do frasco
         PRODUTOS.forEach(function (d) {
@@ -589,7 +615,8 @@
           var novo = d.preco, disp = pai.disponivel;
           if (proprio && !isNaN(num(proprio))) { novo = proprio; disp = true; }
           else {
-            var n = num(pai.preco), tb = CFG.decant_faixas || {};
+            var n = num(pai.preco), nde = num(pai.preco_de), tb = CFG.decant_faixas || {};
+            if (nde > n) n = nde;   // em promoção, o decant segue o preço normal do frasco
             if (Object.prototype.toString.call(tb) === '[object Array]') tb = { 'Árabe': tb };
             var f = tb[pai.categoria] || [];
             for (var i = 0; i < f.length; i++) if (!isNaN(n) && n < f[i][0]) { novo = f[i][1] + ',00'; break; }

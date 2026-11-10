@@ -664,3 +664,19 @@ section[id] { scroll-margin-top: 76px; }
 .acervo-topo { margin: 22px 0 16px; }
 #tituloGrade { font-size: 26px !important; }
 @media (max-width: 759px) { .grade { gap: 26px 12px; } .card { gap: 10px; } .atalho .nome-col { font-size: 19px; } }
+
+/* ── Black Friday ── */
+.s-black { background: #0B0B0A; color: #F4EFE6; }
+.s-black .s-nicho-txt .eyebrow { color: #C9A96A; }
+.s-black .s-nicho-txt .h-display { color: #F4EFE6; }
+.s-black .s-nicho-txt .h-display em { color: #C9A96A; display: block; }
+.s-black .s-nicho-sub { color: #CFC6B6; }
+.s-black .s-nicho-txt .link-fino { color: #F4EFE6; border-color: #C9A96A; }
+.s-black .s-nicho-foto { background: #fff; border-color: #3a3326; }
+.s-black .s-nicho-item .eyebrow { color: #C9A96A; }
+.s-black .s-nicho-nome { color: #F4EFE6; }
+.s-black-preco { font-size: 12px; color: #F4EFE6; font-variant-numeric: tabular-nums; font-weight: 600; }
+.s-black-preco s { color: #8f8778; font-weight: 400; margin-right: 2px; }
+@media (max-width: 759px) { .s-black-preco { font-size: 10.5px; } .s-black-preco s { display: block; margin: 0; } }
+.card .foto { position: relative; }
+.selo-black { position: absolute; top: 8px; left: 8px; background: #0B0B0A; color: #C9A96A; font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; padding: 5px 8px; line-height: 1; }
