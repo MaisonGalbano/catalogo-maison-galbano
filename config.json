@@ -125,16 +125,18 @@
   },
   "banner_black": {
     "inicio": "2026-11-10",
-    "fim": "2026-11-23",
-    "chamada": "Black Friday Maison Galbano",
-    "titulo": "Black Friday:",
+    "fim": "2026-11-29",
+    "chamada": "Black Friday prorrogada",
+    "titulo": "A Black continua:",
     "ids": [
       "MG156",
       "MG157",
+      "MG134",
       "MG004",
       "MG129",
       "MG144",
-      "MG113"
+      "MG020",
+      "MG001"
     ]
   }
 }
